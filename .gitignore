@@ -1,0 +1,9 @@
+*.o
+*.obj
+*.exe
+*.pdb
+*.dxf
+*.json
+tests/
+*.sln
+*.d
