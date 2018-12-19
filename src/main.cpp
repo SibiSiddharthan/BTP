@@ -1,17 +1,6 @@
 //#include"laplace.h"
-//#include"mesh2d.h"
-#include"position.h"
-#include <cmath>
-#include<iostream>
 //#include"output.h"
-#include<cstdlib>
-#include<chrono>
-#include"linear_algebra.h"
-#include"dxfreader.h"
-#include"display.h"
-#include"2d.h"
-#include"mesh.h"
-//#include<thread>
+#include "mesh.h"
 
 using namespace std;
 
@@ -19,7 +8,7 @@ bool quit = false;
 
 void input(_2D_ &boundary, mesh &M)
 {
-	
+
 	cout << "Enter input" << endl;
 	int a;
 	cin >> a;
@@ -28,76 +17,87 @@ void input(_2D_ &boundary, mesh &M)
 		auto start = chrono::high_resolution_clock::now();
 		switch (a)
 		{
-				
+
 		case 0:
 		{
 			M.stats();
-		}break;
+		}
+		break;
 
 		case 1:
 		{
 			M.generate_mesh_basic();
 			M.display();
-			
-		}break;
+		}
+		break;
 
 		case 2:
 		{
 			M.node_insertion();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 3:
 		{
 			M.refine_triangles();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 4:
 		{
 			M.edge_swap();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 5:
 		{
 			M.refine_triangles_near_boundary(node_location::boundary);
 			M.display();
-		}break;
+		}
+		break;
 
 		case 6:
 		{
 			M.refine_triangles_near_boundary(node_location::hole);
 			M.display();
-		}break;
+		}
+		break;
 
 		case 7:
 		{
 			M.centroid_shift();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 8:
 		{
 			M.generate_mesh_full();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 9:
 		{
 			M.generate_ghosts();
 			M.display();
-		}break;
+		}
+		break;
 
 		case 10:
 		{
 			M.display();
-		}break;
+		}
+		break;
 
 		case 11:
 		{
 			M.imp_display();
-		}break;
+		}
+		break;
 
 		case 100:
 		{
@@ -107,12 +107,14 @@ void input(_2D_ &boundary, mesh &M)
 			cout << "Returning to console\n";
 			M.display();
 			glfwWaitEventsTimeout(100.0);
-		}break;
+		}
+		break;
 
 		case 999:
 		{
 			quit = true;
-		}break;
+		}
+		break;
 
 		default:
 			break;
@@ -122,17 +124,14 @@ void input(_2D_ &boundary, mesh &M)
 		chrono::duration<double> elapsed_time = finish - start;
 		cout << "Time Taken for operation: " << elapsed_time.count() << endl;
 	}
-
 }
-
 
 int main()
 {
-	
-		
-	GLFWwindow* window = nullptr;
+
+	GLFWwindow *window = nullptr;
 	create_window(window, 800, 800);
-	
+
 	_2D_ boundary;
 	mesh M;
 	boundary.init();
@@ -145,9 +144,9 @@ int main()
 	boundary.add_hole_circle({ 0.2,-0.2 }, 0.1, 0.2);
 	boundary.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);*/
 	//boundary.dxf_read("tests/polyline.dxf", 4.0);
-	
+
 	//glfwWaitEventsTimeout(100.0);
-	
+
 	if (boundary.transferable)
 	{
 		boundary.display();
@@ -156,14 +155,13 @@ int main()
 		//cin.get();
 		//M.imp_display();
 
-		cout << "0:stats\n1:generate triangles\n2:node insertion\n3:equalize triangles\n4:edge swap\n" <<
-			"5:equalize triangles near boundary\n6:equalize triangles near hole\n7:node shift\n8:auto generate\n9:generate ghost triangles\n10:display\n100:inspect\n999:quit\n";
+		cout << "0:stats\n1:generate triangles\n2:node insertion\n3:equalize triangles\n4:edge swap\n"
+			 << "5:equalize triangles near boundary\n6:equalize triangles near hole\n7:node shift\n8:auto generate\n9:generate ghost triangles\n10:display\n100:inspect\n999:quit\n";
 		while (!quit)
 		{
 			glfwWaitEventsTimeout(100.0);
 			input(boundary, M);
 			glfwPostEmptyEvent();
-
 		}
 	}
 
@@ -180,5 +178,3 @@ int main()
 
 	return 1;
 }
-
-

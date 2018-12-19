@@ -15,16 +15,18 @@ ifeq ($(config),debug)
   TARGETDIR = .
   TARGET = $(TARGETDIR)/mesh_debug.exe
   OBJDIR = obj/make/Debug
+  PCH = src/preprocess.h
+  GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES +=
   INCLUDES +=
-  FORCE_INCLUDE +=
+  FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -std=c++17 -g
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lglfw3 -lglew32 -lopengl32 -lgdi32
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -40,14 +42,16 @@ endif
 ifeq ($(config),release)
   RESCOMP = windres
   TARGETDIR = .
-  TARGET = $(TARGETDIR)/Mesh.exe
+  TARGET = $(TARGETDIR)/mesh.exe
   OBJDIR = obj/make/Release
+  PCH = src/preprocess.h
+  GCH = $(OBJDIR)/$(notdir $(PCH)).gch
   DEFINES +=
   INCLUDES +=
-  FORCE_INCLUDE +=
+  FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O3 -march=native
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O3 -std=c++17 -march=native
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += -lglfw3 -lglew32 -lopengl32 -lgdi32
   LDDEPS +=

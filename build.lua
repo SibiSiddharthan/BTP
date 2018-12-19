@@ -15,11 +15,14 @@ project "Mesh"
 	filter {"action:gmake"}
 		links {"glfw3" , "glew32" , "opengl32" , "gdi32"}
 		objdir ("./obj/make/")
+		pchheader ("src/preprocess.h")
 		filter{"configurations:Debug"}
-			buildoptions{"-g"}
 			targetname("mesh_debug")
+			symbols("On")
 		filter{"configurations:Release"}
-			buildoptions {"-march=native"}
+			targetname("mesh")
+			symbols("Off")
+			optimize ("Speed")
 			
 	filter {"action:vs*"}
 		targetname ("mesh_msc")

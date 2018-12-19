@@ -1,5 +1,4 @@
-#include"position.h"
-
+#include "position.h"
 
 #define epsilon 1.0e-14
 
@@ -22,8 +21,6 @@ pos pos::operator-(pos p)
 	result.z = this->z - p.z;
 	return result;
 }
-
-
 
 pos operator*(pos p, double x)
 {
@@ -59,7 +56,7 @@ bool operator==(pos a, pos b)
 		return false;
 }
 
-std::ostream& operator<<(std::ostream &out, pos p)
+std::ostream &operator<<(std::ostream &out, pos p)
 {
 	out << "x: " << p.x << " y: " << p.y << " z: " << p.z << std::endl;
 	return out;
@@ -73,10 +70,9 @@ double area_of_triangle(pos a, pos b, pos c)
 	l1 = distance(a, b);
 	l2 = distance(a, c);
 	l3 = distance(b, c);
-	s = (l1 + l2 + l3)*0.5;
-	return sqrt(s*(s - l1)*(s - l2)*(s - l3));
+	s = (l1 + l2 + l3) * 0.5;
+	return sqrt(s * (s - l1) * (s - l2) * (s - l3));
 }
-
 
 pos rotate_point(pos p, double angle)
 {
@@ -85,7 +81,6 @@ pos rotate_point(pos p, double angle)
 	p.y = temp.x * sin(angle) + temp.y * cos(angle);
 	return p;
 }
-
 
 double line_inclination_absolute(line l)
 {
@@ -97,21 +92,19 @@ double line_inclination_absolute(line l)
 
 		if (angle >= 0)
 		{
-			if (temp.x >= 0)//1st quadrant
+			if (temp.x >= 0) //1st quadrant
 				return angle;
-			else// 3rd quadrant
+			else // 3rd quadrant
 				return pi_ + angle;
-
 		}
 		else
 		{
 			angle = fabs(angle);
-			if (temp.x >= 0)//4th quadrant
+			if (temp.x >= 0) //4th quadrant
 				return 2 * pi_ - angle;
-			else//2nd quadrant
+			else //2nd quadrant
 				return pi_ - angle;
 		}
-
 	}
 
 	else
@@ -123,15 +116,17 @@ double line_inclination_absolute(line l)
 
 		else if (temp.y < 0)
 		{
-			return 1.5*pi_;
+			return 1.5 * pi_;
 		}
 	}
+
+	return 0;
 }
 
 //Returns 1 on one side -1 on other side 0 if coincident
 int side_of_point(line l, pos p)
 {
-	double a = (p.y - l.start.y)*(l.end.x - l.start.x) - (p.x - l.start.x)*(l.end.y - l.start.y);
+	double a = (p.y - l.start.y) * (l.end.x - l.start.x) - (p.x - l.start.x) * (l.end.y - l.start.y);
 
 	if (a > 0)
 	{
@@ -157,7 +152,7 @@ bool same_line(line l1, line l2)
 		return false;
 }
 
-bool unique_pos(pos p, pos *P,const int n)
+bool unique_pos(pos p, pos *P, const int n)
 {
 	int flag = 0;
 	for (int i = 0; i < n; i++)
@@ -168,14 +163,14 @@ bool unique_pos(pos p, pos *P,const int n)
 			break;
 		}
 	}
-	
+
 	if (flag == 0)
 		return true;
 	else
 		return false;
 }
 
-bool unique_pos(pos p, vector<pos>& plist)
+bool unique_pos(pos p, vector<pos> &plist)
 {
 	int flag = 0;
 	for (int i = 0; i < plist.size(); i++)
@@ -193,17 +188,14 @@ bool unique_pos(pos p, vector<pos>& plist)
 		return false;
 }
 
-
 bool do_they_intersect(line a, line b)
 {
 	if ((a.start != b.start && a.start != b.end && a.end != b.start && a.end != b.end))
 	{
-		if (!(side_of_point(a, b.start) == 0 && side_of_point(a, b.end) == 0 &&  //concurrent line segments
-			side_of_point(b, a.start) == 0 && side_of_point(b, a.end) == 0))
+		if (!(side_of_point(a, b.start) == 0 && side_of_point(a, b.end) == 0 && //concurrent line segments
+			  side_of_point(b, a.start) == 0 && side_of_point(b, a.end) == 0))
 		{
-			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0))
-				|| (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0))
-				|| (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
+			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) || (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) || (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
 			{
 				return true;
 			}
@@ -245,19 +237,18 @@ bool left_test_2d(line l, pos p)
 
 		if (angle >= 0)
 		{
-			if (temp.x >= 0)//1st quadrant
-				p.x = p.x*cos(pi_*0.5 - angle) - p.y*sin(pi_*0.5 - angle);
-			else// 3rd quadrant
-				p.x = p.x*cos(pi_*0.5 + angle) + p.y*sin(pi_*0.5 + angle);
-
+			if (temp.x >= 0) //1st quadrant
+				p.x = p.x * cos(pi_ * 0.5 - angle) - p.y * sin(pi_ * 0.5 - angle);
+			else // 3rd quadrant
+				p.x = p.x * cos(pi_ * 0.5 + angle) + p.y * sin(pi_ * 0.5 + angle);
 		}
 		else
 		{
 			angle = fabs(angle);
-			if (temp.x >= 0)//4th quadrant
-				p.x = p.x*cos(pi_*0.5 + angle) - p.y*sin(pi_*0.5 + angle);
-			else//2nd quadrant
-				p.x = p.x*cos(pi_*0.5 - angle) + p.y*sin(pi_*0.5 - angle);
+			if (temp.x >= 0) //4th quadrant
+				p.x = p.x * cos(pi_ * 0.5 + angle) - p.y * sin(pi_ * 0.5 + angle);
+			else //2nd quadrant
+				p.x = p.x * cos(pi_ * 0.5 - angle) + p.y * sin(pi_ * 0.5 - angle);
 		}
 
 		if (p.x < 0)
@@ -284,6 +275,8 @@ bool left_test_2d(line l, pos p)
 				return false;
 		}
 	}
+
+	return true;
 }
 
 //If the absolute value of the square of the area of the triangle is less than epsilon then the function returns true
@@ -295,9 +288,8 @@ bool collinear_test(line l, pos p)
 	l1 = distance(l.start, p);
 	l2 = distance(l.end, p);
 	l3 = distance(l.start, l.end);
-	s = (l1 + l2 + l3)*0.5;
-	sq_area = (s*(s - l1)*(s - l2)*(s - l3));
-
+	s = (l1 + l2 + l3) * 0.5;
+	sq_area = (s * (s - l1) * (s - l2) * (s - l3));
 
 	if (fabs(sq_area) < epsilon)
 		return true;
@@ -312,7 +304,7 @@ pos rotate_xy(pos p, double angle)
 	v(0) = p.x;
 	v(1) = p.y;
 	v(2) = p.z;
-	v = rotation_xy(angle)*v;
+	v = rotation_xy(angle) * v;
 	p.x = v(0);
 	p.y = v(1);
 	p.z = v(2);
@@ -325,7 +317,7 @@ pos rotate_yz(pos p, double angle)
 	v(0) = p.x;
 	v(1) = p.y;
 	v(2) = p.z;
-	v = rotation_yz(angle)*v;
+	v = rotation_yz(angle) * v;
 	p.x = v(0);
 	p.y = v(1);
 	p.z = v(2);
@@ -338,13 +330,12 @@ pos rotate_zx(pos p, double angle)
 	v(0) = p.x;
 	v(1) = p.y;
 	v(2) = p.z;
-	v = rotation_zx(angle)*v;
+	v = rotation_zx(angle) * v;
 	p.x = v(0);
 	p.y = v(1);
 	p.z = v(2);
 	return p;
 }
-
 
 /*Shifts origin to b
 Finds the inclination of ba,bc
@@ -354,20 +345,19 @@ double angle_between_lines(pos a, pos b, pos c)
 	a = a - b; //shifting origin to b
 	c = c - b;
 	b = b - b;
-	double angle_a = line_inclination_absolute({ b,a });
-	double angle_c = line_inclination_absolute({ b,c });
+	double angle_a = line_inclination_absolute({b, a});
+	double angle_c = line_inclination_absolute({b, c});
 
 	if (min(angle_a, angle_c) == angle_a)
 	{
 		c = rotate_point(c, (2 * pi_) - angle_a);
-		return line_inclination_absolute({ b,c });
+		return line_inclination_absolute({b, c});
 	}
 	else
 	{
 		a = rotate_point(a, (2 * pi_) - angle_c);
-		return line_inclination_absolute({ b,a });
+		return line_inclination_absolute({b, a});
 	}
-
 }
 
 double max_angle_of_triangle(pos a, pos b, pos c)

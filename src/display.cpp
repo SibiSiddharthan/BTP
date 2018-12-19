@@ -1,4 +1,4 @@
-#include"display.h"
+#include "display.h"
 
 void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
@@ -9,52 +9,56 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
 			if (mods == GLFW_MOD_SHIFT)
-				p.y -= 0.5*dy;
+				p.y -= 0.5 * dy;
 			else if (mods == GLFW_MOD_CONTROL)
 				p.y -= 2 * dy;
 			else
 				p.y -= dy;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_S:
 	{
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
 			if (mods == GLFW_MOD_SHIFT)
-				p.y += 0.5*dy;
+				p.y += 0.5 * dy;
 			else if (mods == GLFW_MOD_CONTROL)
 				p.y += 2 * dy;
 			else
 				p.y += dy;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_A:
 	{
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
 			if (mods == GLFW_MOD_SHIFT)
-				p.x += 0.5*dx;
+				p.x += 0.5 * dx;
 			else if (mods == GLFW_MOD_CONTROL)
 				p.x += 2 * dx;
 			else
 				p.x += dx;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_D:
 	{
 		if (action == GLFW_PRESS || action == GLFW_REPEAT)
 		{
 			if (mods == GLFW_MOD_SHIFT)
-				p.x -= 0.5*dx;
+				p.x -= 0.5 * dx;
 			else if (mods == GLFW_MOD_CONTROL)
 				p.x -= 2 * dx;
 			else
 				p.x -= dx;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_KP_ADD:
 	{
@@ -62,7 +66,8 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		{
 			zoom *= zoom_change;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_KP_SUBTRACT:
 	{
@@ -70,7 +75,8 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		{
 			zoom /= zoom_change;
 		}
-	}break;
+	}
+	break;
 
 	case GLFW_KEY_ESCAPE:
 	{
@@ -78,33 +84,26 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 		{
 			return_to_console = true;
 			zoom = 1.0;
-			p = { 0,0 };
+			p = {0, 0};
 		}
-	}break;
-
-
 	}
-
+	break;
+	}
 }
 
-
-void cursor_position_callback(GLFWwindow*, double, double)
+void cursor_position_callback(GLFWwindow *, double, double)
 {
-
 }
 
-
-void cursor_enter_callback(GLFWwindow*, int)
+void cursor_enter_callback(GLFWwindow *, int)
 {
-
 }
 
-void mouse_button_callback(GLFWwindow*, int, int, int)
+void mouse_button_callback(GLFWwindow *, int, int, int)
 {
-
 }
 
-shadersource parseshader(const std::string& file)
+shadersource parseshader(const std::string &file)
 {
 	std::ifstream f1(file);
 	std::string line;
@@ -125,13 +124,13 @@ shadersource parseshader(const std::string& file)
 				ss[(int)type] << line << '\n';
 		}
 	}
-	return { ss[0].str(),ss[1].str() };
+	return {ss[0].str(), ss[1].str()};
 }
 
-unsigned int compileshader(unsigned int type, const std::string& source)
+unsigned int compileshader(unsigned int type, const std::string &source)
 {
 	unsigned int id = glCreateShader(type);
-	const char* src = source.c_str();
+	const char *src = source.c_str();
 	glShaderSource(id, 1, &src, nullptr);
 	glCompileShader(id);
 
@@ -141,20 +140,18 @@ unsigned int compileshader(unsigned int type, const std::string& source)
 	{
 		int length;
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char* message = (char*)alloca(length * sizeof(char));
+		char *message = (char *)alloca(length * sizeof(char));
 		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "fail/n" << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << std::endl << message << std::endl;
+		std::cout << "fail/n" << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << std::endl
+				  << message << std::endl;
 		glDeleteShader(id);
 		return 0;
 	}
 
-
 	return id;
-
 }
 
-
-unsigned int createshader(const std::string& vertexshader, const std::string& fragmentshader)
+unsigned int createshader(const std::string &vertexshader, const std::string &fragmentshader)
 {
 	unsigned int program = glCreateProgram();
 	unsigned int vs = compileshader(GL_VERTEX_SHADER, vertexshader);
@@ -168,10 +165,9 @@ unsigned int createshader(const std::string& vertexshader, const std::string& fr
 	glDeleteShader(fs);
 
 	return program;
-
 }
 
-int create_window(GLFWwindow*& window, int width, int height)
+int create_window(GLFWwindow *&window, int width, int height)
 {
 
 	if (!glfwInit())

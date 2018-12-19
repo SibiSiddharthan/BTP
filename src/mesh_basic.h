@@ -1,20 +1,22 @@
 #pragma once
-#include"position.h"
-#include<algorithm>
-#include<vector>
-
+#include "position.h"
 
 enum class node_location
 {
-	boundary, hole, inside, outside
+	boundary,
+	hole,
+	inside,
+	outside
 };
 enum class edge_location
 {
-	boundary, inside
+	boundary,
+	inside
 };
 enum class triangle_type
 {
-	domain, ghost
+	domain,
+	ghost
 };
 
 struct node;
@@ -29,8 +31,8 @@ struct node
 	bool availability;
 	int share = 0;
 	node_location location;
-	std::vector<mesh_triangle*> T;
-	std::vector<edge*> BE;
+	std::vector<mesh_triangle *> T;
+	std::vector<edge *> BE;
 	node()
 	{
 		p = {};
@@ -38,11 +40,9 @@ struct node
 		location = node_location::inside;
 	}
 
-	node(pos _p, node_location _location, bool _availability = true) :p{ _p }, location{ _location }, availability{ _availability }
+	node(pos _p, node_location _location, bool _availability = true) : p{_p}, location{_location}, availability{_availability}
 	{
-
 	}
-
 };
 
 struct edge
@@ -52,7 +52,7 @@ struct edge
 	edge_location location = edge_location::boundary;
 	inline double length()
 	{
-		return distance(start->p,end->p);
+		return distance(start->p, end->p);
 	}
 
 	edge()
@@ -61,9 +61,8 @@ struct edge
 		end = nullptr;
 	}
 
-	edge(node *_start, node *_end, edge_location _location, bool _availability = true) :start{ _start }, end{ _end }, location{ _location }, availability{ _availability }
+	edge(node *_start, node *_end, edge_location _location, bool _availability = true) : start{_start}, end{_end}, location{_location}, availability{_availability}
 	{
-
 	}
 };
 
@@ -78,8 +77,8 @@ struct mesh_triangle
 		l1 = distance(a->p, b->p);
 		l2 = distance(a->p, c->p);
 		l3 = distance(b->p, c->p);
-		s = (l1 + l2 + l3)*0.5;
-		return sqrt(s*(s - l1)*(s - l2)*(s - l3));
+		s = (l1 + l2 + l3) * 0.5;
+		return sqrt(s * (s - l1) * (s - l2) * (s - l3));
 	}
 
 	inline double min_angle()
@@ -91,7 +90,6 @@ struct mesh_triangle
 
 		return std::min(std::min(angle_a, angle_b), std::min(angle_b, angle_c));
 	}
-	
 
 	mesh_triangle()
 	{
@@ -134,7 +132,6 @@ struct mesh_triangle
 			to->share++;
 		}
 	}
-	
 };
 
 struct tetrahedron
@@ -149,8 +146,6 @@ struct tetrahedron
 		d = nullptr;
 	}
 };
-
-
 
 class mesh;
 class _2D_;
