@@ -26,7 +26,7 @@ project "Mesh"
 
 	filter {"action:gmake","system:linux"}
 		links {"glfw" , "GLEW" , "GL" , "dl", "rt"}
-		linkoptions{"-X11"}
+		linkoptions{"-x11"}
 		objdir ("./obj/")
 		pchheader ("src/preprocess.h")
 		filter{"configurations:Debug"}
