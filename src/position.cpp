@@ -43,6 +43,7 @@ double line_inclination_absolute(line l)
 			angle = fabs(angle);
 			if (temp.x >= 0) //4th quadrant
 				return 2 * pi - angle;
+
 			else //2nd quadrant
 				return pi - angle;
 		}
@@ -51,14 +52,10 @@ double line_inclination_absolute(line l)
 	else
 	{
 		if (temp.y > 0)
-		{
 			return pi * 0.5;
-		}
 
 		else if (temp.y < 0)
-		{
 			return 1.5 * pi;
-		}
 	}
 
 	return 0;
@@ -70,19 +67,13 @@ int side_of_point(line l, pos p)
 	double a = (p.y - l.start.y) * (l.end.x - l.start.x) - (p.x - l.start.x) * (l.end.y - l.start.y);
 
 	if (a > 0)
-	{
 		return 1;
-	}
 
 	else if (a < 0)
-	{
 		return -1;
-	}
 
 	else
-	{
 		return 0;
-	}
 }
 
 bool same_line(line l1, line l2)
@@ -137,26 +128,18 @@ bool do_they_intersect(line a, line b)
 			  side_of_point(b, a.start) == 0 && side_of_point(b, a.end) == 0))
 		{
 			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) || (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) || (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
-			{
 				return true;
-			}
 
 			else
-			{
 				return false;
-			}
 		}
 
 		else
-		{
 			return false;
-		}
 	}
 
 	else
-	{
 		return false;
-	}
 }
 
 // TODO

@@ -12,7 +12,7 @@ project "Mesh"
 	files {"src/*.cpp","src/*.h"}
 	cppdialect "C++17"
 	
-	filter {"action:gmake"}
+	filter {"action:gmake","system:windows"}
 		links {"glfw3" , "glew32" , "opengl32" , "gdi32"}
 		objdir ("./obj/make/")
 		pchheader ("src/preprocess.h")
@@ -23,6 +23,19 @@ project "Mesh"
 			targetname("mesh")
 			symbols("Off")
 			optimize ("Size")  --* Size -> -O2 ; On ,Speed -> -O3
+
+	filter {"action:gmake","system:linux"}
+		links {"glfw" , "GLEW" , "GL" , "dl", "rt"}
+		linkoptions{"-X11"}
+		objdir ("./obj/")
+		pchheader ("src/preprocess.h")
+		filter{"configurations:Debug"}
+			targetname("mesh_debug")
+			symbols("On")
+		filter{"configurations:Release"}
+			targetname("mesh")
+			symbols("Off")
+			optimize ("Size")
 			
 	filter {"action:vs*"}
 		targetname ("mesh_msc")

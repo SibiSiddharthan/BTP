@@ -70,18 +70,22 @@ inline pos operator/(const pos p, const double x)
 	return result;
 }
 
-inline void operator+=(pos &res, const pos p)
+/*
+! Not Working
+inline pos& operator+=(pos &res, const pos p)
 {
 	res.x += p.x;
 	res.y += p.y;
 	res.z += p.z;
+	return res;
 }
 
-inline void operator-=(pos &res, const pos p)
+inline pos operator-=(pos &res, const pos p)
 {
 	res.x -= p.x;
 	res.y -= p.y;
 	res.z -= p.z;
+	return res;
 }
 
 inline void operator*=(pos &res, const double x)
@@ -98,6 +102,7 @@ inline void operator/=(pos &res, const double x)
 	res.z /= x;
 }
 
+*/
 inline bool operator!=(const pos a, const pos b)
 {
 	return (a.x != b.x || a.y != b.y || a.z != b.z);
