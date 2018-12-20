@@ -1,66 +1,7 @@
 #include "position.h"
 
-#define epsilon 1.0e-14
-
 using namespace std;
-//operators
-pos pos::operator+(pos p)
-{
-	pos result;
-	result.x = this->x + p.x;
-	result.y = this->y + p.y;
-	result.z = this->z + p.z;
-	return result;
-}
 
-pos pos::operator-(pos p)
-{
-	pos result;
-	result.x = this->x - p.x;
-	result.y = this->y - p.y;
-	result.z = this->z - p.z;
-	return result;
-}
-
-pos operator*(pos p, double x)
-{
-	pos result;
-	result.x = p.x * x;
-	result.y = p.y * x;
-	result.z = p.z * x;
-	return result;
-}
-
-pos operator/(pos p, double x)
-{
-	pos result;
-	result.x = p.x / x;
-	result.y = p.y / x;
-	result.z = p.z / x;
-	return result;
-}
-
-bool operator!=(pos a, pos b)
-{
-	if (a.x != b.x || a.y != b.y || a.z != b.z)
-		return true;
-	else
-		return false;
-}
-
-bool operator==(pos a, pos b)
-{
-	if (a.x == b.x && a.y == b.y && a.z == b.z)
-		return true;
-	else
-		return false;
-}
-
-std::ostream &operator<<(std::ostream &out, pos p)
-{
-	out << "x: " << p.x << " y: " << p.y << " z: " << p.z << std::endl;
-	return out;
-}
 
 //useful funtions
 
@@ -95,15 +36,15 @@ double line_inclination_absolute(line l)
 			if (temp.x >= 0) //1st quadrant
 				return angle;
 			else // 3rd quadrant
-				return pi_ + angle;
+				return pi + angle;
 		}
 		else
 		{
 			angle = fabs(angle);
 			if (temp.x >= 0) //4th quadrant
-				return 2 * pi_ - angle;
+				return 2 * pi - angle;
 			else //2nd quadrant
-				return pi_ - angle;
+				return pi - angle;
 		}
 	}
 
@@ -111,12 +52,12 @@ double line_inclination_absolute(line l)
 	{
 		if (temp.y > 0)
 		{
-			return pi_ * 0.5;
+			return pi * 0.5;
 		}
 
 		else if (temp.y < 0)
 		{
-			return 1.5 * pi_;
+			return 1.5 * pi;
 		}
 	}
 
@@ -218,19 +159,24 @@ bool do_they_intersect(line a, line b)
 	}
 }
 
+// TODO
 pos intersection_point(line a, line b)
 {
 	pos result = {};
 	return result;
 }
 
-/*Shifts origin to start of line segment and aligns the y axis along it
-and checks whether the point is on the left or right side of the line*/
+/*
+Shifts origin to start of line segment and aligns the y axis along it
+and checks whether the point is on the left or right side of the line
+* If the point is collinear the left test passes
+*/
+
 bool left_test_2d(line l, pos p)
 {
 	p = p - l.start;
 	pos temp = l.end - l.start;
-	if (fabs(l.end.x - l.start.x) > epsilon)
+	if (fabs(l.end.x - l.start.x) > epsilon) // Not 90 degree
 	{
 		double m = (l.end.y - l.start.y) / ((l.end.x - l.start.x));
 		double angle = atan(m);
@@ -238,17 +184,17 @@ bool left_test_2d(line l, pos p)
 		if (angle >= 0)
 		{
 			if (temp.x >= 0) //1st quadrant
-				p.x = p.x * cos(pi_ * 0.5 - angle) - p.y * sin(pi_ * 0.5 - angle);
+				p.x = p.x * cos(pi * 0.5 - angle) - p.y * sin(pi * 0.5 - angle);
 			else // 3rd quadrant
-				p.x = p.x * cos(pi_ * 0.5 + angle) + p.y * sin(pi_ * 0.5 + angle);
+				p.x = p.x * cos(pi * 0.5 + angle) + p.y * sin(pi * 0.5 + angle);
 		}
 		else
 		{
 			angle = fabs(angle);
 			if (temp.x >= 0) //4th quadrant
-				p.x = p.x * cos(pi_ * 0.5 + angle) - p.y * sin(pi_ * 0.5 + angle);
+				p.x = p.x * cos(pi * 0.5 + angle) - p.y * sin(pi * 0.5 + angle);
 			else //2nd quadrant
-				p.x = p.x * cos(pi_ * 0.5 - angle) + p.y * sin(pi_ * 0.5 - angle);
+				p.x = p.x * cos(pi * 0.5 - angle) + p.y * sin(pi * 0.5 - angle);
 		}
 
 		if (p.x < 0)
@@ -274,16 +220,16 @@ bool left_test_2d(line l, pos p)
 			else
 				return false;
 		}
-	}
 
-	return true;
+		else
+			return true;
+	}
 }
 
 //If the absolute value of the square of the area of the triangle is less than epsilon then the function returns true
 bool collinear_test(line l, pos p)
 {
 	double sq_area;
-	//area = area_of_triangle(e.start->p, e.end->p, p);
 	double l1, l2, l3, s;
 	l1 = distance(l.start, p);
 	l2 = distance(l.end, p);
@@ -350,12 +296,12 @@ double angle_between_lines(pos a, pos b, pos c)
 
 	if (min(angle_a, angle_c) == angle_a)
 	{
-		c = rotate_point(c, (2 * pi_) - angle_a);
+		c = rotate_point(c, (2 * pi) - angle_a);
 		return line_inclination_absolute({b, c});
 	}
 	else
 	{
-		a = rotate_point(a, (2 * pi_) - angle_c);
+		a = rotate_point(a, (2 * pi) - angle_c);
 		return line_inclination_absolute({b, a});
 	}
 }

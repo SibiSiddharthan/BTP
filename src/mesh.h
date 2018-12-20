@@ -277,7 +277,7 @@ inline pos generate_ghost_point(triangle t, pos p)
 	{
 		angle = line_inclination_absolute({t.b, t.c});
 		p = p - t.b;
-		p = rotate_point(p, (2 * pi_ - angle));
+		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);
@@ -289,7 +289,7 @@ inline pos generate_ghost_point(triangle t, pos p)
 	{
 		angle = line_inclination_absolute({t.c, t.a});
 		p = p - t.c;
-		p = rotate_point(p, (2 * pi_ - angle));
+		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);
@@ -301,7 +301,7 @@ inline pos generate_ghost_point(triangle t, pos p)
 	{
 		angle = line_inclination_absolute({t.a, t.b});
 		p = p - t.a;
-		p = rotate_point(p, (2 * pi_ - angle));
+		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);

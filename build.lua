@@ -22,7 +22,7 @@ project "Mesh"
 		filter{"configurations:Release"}
 			targetname("mesh")
 			symbols("Off")
-			optimize ("Speed")
+			optimize ("Size")  --* Size -> -O2 ; On ,Speed -> -O3
 			
 	filter {"action:vs*"}
 		targetname ("mesh_msc")
@@ -33,4 +33,4 @@ project "Mesh"
 		libdirs {library_path}
 		objdir ("./obj/ms/")
 		filter {"configurations:Release"}
-			optimize "Full"
+			optimize "On"

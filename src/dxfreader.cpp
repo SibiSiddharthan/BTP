@@ -234,10 +234,10 @@ void refine_arc(std::vector<line> &l, pos centre, double radius, double start_an
 
 	if (start_angle == 0 && end_angle == 360)
 	{
-		length = 2 * pi_ * radius;
+		length = 2 * pi * radius;
 		number_of_divisions = length / dx;
 		n = number_of_divisions;
-		dtheta = 2 * pi_ / n;
+		dtheta = 2 * pi / n;
 
 		if (number_of_divisions > 1)
 		{
@@ -261,21 +261,21 @@ void refine_arc(std::vector<line> &l, pos centre, double radius, double start_an
 
 		else if (start_angle < end_angle)
 		{
-			length = radius * (end_angle - start_angle) * pi_ / 180;
+			length = radius * (end_angle - start_angle) * pi / 180;
 			number_of_divisions = length / dx;
 			n = number_of_divisions;
 			//cout << n;
-			dtheta = (end_angle - start_angle) * pi_ / 180 / n;
+			dtheta = (end_angle - start_angle) * pi / 180 / n;
 			//cout << start_angle << " " << end_angle << endl;
 			if (number_of_divisions > 1)
 			{
 				for (int i = 0; i < number_of_divisions; i++)
 				{
-					temp1.x = centre.x + radius * cos(start_angle * pi_ / 180 + i * dtheta);
-					temp1.y = centre.y + radius * sin(start_angle * pi_ / 180 + i * dtheta);
+					temp1.x = centre.x + radius * cos(start_angle * pi / 180 + i * dtheta);
+					temp1.y = centre.y + radius * sin(start_angle * pi / 180 + i * dtheta);
 
-					temp2.x = centre.x + radius * cos((i + 1) * dtheta + start_angle * pi_ / 180);
-					temp2.y = centre.y + radius * sin((i + 1) * dtheta + start_angle * pi_ / 180);
+					temp2.x = centre.x + radius * cos((i + 1) * dtheta + start_angle * pi / 180);
+					temp2.y = centre.y + radius * sin((i + 1) * dtheta + start_angle * pi / 180);
 
 					l.push_back({temp1, temp2});
 
@@ -287,21 +287,21 @@ void refine_arc(std::vector<line> &l, pos centre, double radius, double start_an
 		else if (start_angle > end_angle)
 		{
 			end_angle += 360;
-			length = radius * (end_angle - start_angle) * pi_ / 180;
+			length = radius * (end_angle - start_angle) * pi / 180;
 			number_of_divisions = length / dx;
 			n = number_of_divisions;
 			//cout << n;
-			dtheta = (end_angle - start_angle) * pi_ / 180 / n;
+			dtheta = (end_angle - start_angle) * pi / 180 / n;
 
 			if (number_of_divisions > 1)
 			{
 				for (int i = 0; i < number_of_divisions; i++)
 				{
-					temp1.x = centre.x + radius * cos(start_angle * pi_ / 180 + i * dtheta);
-					temp1.y = centre.y + radius * sin(start_angle * pi_ / 180 + i * dtheta);
+					temp1.x = centre.x + radius * cos(start_angle * pi / 180 + i * dtheta);
+					temp1.y = centre.y + radius * sin(start_angle * pi / 180 + i * dtheta);
 
-					temp2.x = centre.x + radius * cos((i + 1) * dtheta + start_angle * pi_ / 180);
-					temp2.y = centre.y + radius * sin((i + 1) * dtheta + start_angle * pi_ / 180);
+					temp2.x = centre.x + radius * cos((i + 1) * dtheta + start_angle * pi / 180);
+					temp2.y = centre.y + radius * sin((i + 1) * dtheta + start_angle * pi / 180);
 
 					l.push_back({temp1, temp2});
 				}

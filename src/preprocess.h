@@ -6,10 +6,12 @@
 #define and &&
 #define or ||
 #define not !
+#define in :
 #endif
 
-//Acceptable error in comparisons
-const double epsilon = 1.0e-10;
+//* Acceptable error in comparisons is sqrt(epsilon)
+const double epsilon = 1.0e-14;
+const double pi = 3.14159265358979323;
 
 #include <iostream>
 #include <fstream>

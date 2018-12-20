@@ -2,15 +2,11 @@
 #include "preprocess.h"
 #include "linear_algebra.h"
 
-#define pi_ 3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862
-
 struct pos
 {
 	double x = 0, y = 0, z = 0;
-	pos operator+(pos);
-	pos operator-(pos);
 
-	pos(double p = 0, double q = 0, double r = 0) : x{p}, y{q}, z{r}
+	pos(double _x = 0, double _y = 0, double _z = 0) : x{_x}, y{_y}, z{_z}
 	{
 	}
 };
@@ -38,14 +34,88 @@ struct triangle
 };
 
 //operators;
-pos operator*(pos, double);
-pos operator/(pos, double);
-bool operator!=(pos, pos);
-bool operator==(pos, pos);
-std::ostream &operator<<(std::ostream &, pos);
+inline pos operator+(const pos p, const pos q)
+{
+	pos result;
+	result.x = q.x + p.x;
+	result.y = q.y + p.y;
+	result.z = q.z + p.z;
+	return result;
+}
+
+inline pos operator-(const pos p, const pos q)
+{
+	pos result;
+	result.x = q.x - p.x;
+	result.y = q.y - p.y;
+	result.z = q.z - p.z;
+	return result;
+}
+
+inline pos operator*(const pos p, const double x)
+{
+	pos result;
+	result.x = p.x * x;
+	result.y = p.y * x;
+	result.z = p.z * x;
+	return result;
+}
+
+inline pos operator/(const pos p, const double x)
+{
+	pos result;
+	result.x = p.x / x;
+	result.y = p.y / x;
+	result.z = p.z / x;
+	return result;
+}
+
+inline void operator+=(pos &res, const pos p)
+{
+	res.x += p.x;
+	res.y += p.y;
+	res.z += p.z;
+}
+
+inline void operator-=(pos &res, const pos p)
+{
+	res.x -= p.x;
+	res.y -= p.y;
+	res.z -= p.z;
+}
+
+inline void operator*=(pos &res, const double x)
+{
+	res.x *= x;
+	res.y *= x;
+	res.z *= x;
+}
+
+inline void operator/=(pos &res, const double x)
+{
+	res.x /= x;
+	res.y /= x;
+	res.z /= x;
+}
+
+inline bool operator!=(const pos a, const pos b)
+{
+	return (a.x != b.x || a.y != b.y || a.z != b.z);
+}
+
+inline bool operator==(const pos a, const pos b)
+{
+	return ((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z) < epsilon); //* square root is not required
+}
+
+inline std::ostream &operator<<(std::ostream &out, const pos p)
+{
+	out << "x: " << p.x << " y: " << p.y << " z: " << p.z << std::endl;
+	return out;
+}
 
 //useful function
-inline double distance(pos a, pos b)
+inline double distance(const pos a, const pos b)
 {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z));
 }

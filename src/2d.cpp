@@ -21,7 +21,7 @@ void _2D_::add_boundary_circle(double r, double dx)
 	int i = 1, n = number_of_nodes;
 	int e = number_of_edges;
 
-	while (dx * i < 2 * pi_)
+	while (dx * i < 2 * pi)
 	{
 		N[number_of_nodes] = {temp, node_location::boundary, true};
 		temp.x = r * cos((i)*dx);
