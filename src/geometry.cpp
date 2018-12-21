@@ -1,6 +1,4 @@
-#include "position.h"
-
-using namespace std;
+#include "geometry.h"
 
 
 //useful funtions
@@ -102,7 +100,7 @@ bool unique_pos(pos p, pos *P, const int n)
 		return false;
 }
 
-bool unique_pos(pos p, vector<pos> &plist)
+bool unique_pos(pos p, std::vector<pos> &plist)
 {
 	int flag = 0;
 	for (int i = 0; i < plist.size(); i++)
@@ -277,7 +275,7 @@ double angle_between_lines(pos a, pos b, pos c)
 	double angle_a = line_inclination_absolute({b, a});
 	double angle_c = line_inclination_absolute({b, c});
 
-	if (min(angle_a, angle_c) == angle_a)
+	if (std::min(angle_a, angle_c) == angle_a)
 	{
 		c = rotate_point(c, (2 * pi) - angle_a);
 		return line_inclination_absolute({b, c});
@@ -296,7 +294,7 @@ double max_angle_of_triangle(pos a, pos b, pos c)
 	angle_b = angle_between_lines(a, b, c);
 	angle_c = angle_between_lines(a, c, b);
 
-	return max(max(angle_a, angle_b), max(angle_b, angle_c));
+	return std::max(std::max(angle_a, angle_b), std::max(angle_b, angle_c));
 }
 
 double min_angle_of_triangle(pos a, pos b, pos c)
@@ -306,5 +304,5 @@ double min_angle_of_triangle(pos a, pos b, pos c)
 	angle_b = angle_between_lines(a, b, c);
 	angle_c = angle_between_lines(a, c, b);
 
-	return min(min(angle_a, angle_b), min(angle_b, angle_c));
+	return std::min(std::min(angle_a, angle_b), std::min(angle_b, angle_c));
 }

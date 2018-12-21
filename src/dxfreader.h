@@ -1,21 +1,6 @@
 #pragma once
-#include "position.h"
+#include "geometry.h"
 
-enum class entity_type
-{
-	point = 20000,
-	line = 30000,
-	polyline = 40000,
-	circle = 50000,
-	arc = 60000,
-	end = 100000
-};
-
-struct read_entity
-{
-	std::vector<double> data;
-	entity_type type;
-};
 
 //Reads the dxf 2007 file and and converts it into a vector of lines
 void read_file(std::ifstream &, const std::string, std::vector<line> &, double dx);

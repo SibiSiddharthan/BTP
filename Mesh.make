@@ -72,10 +72,10 @@ OBJECTS := \
 	$(OBJDIR)/2d.o \
 	$(OBJDIR)/display.o \
 	$(OBJDIR)/dxfreader.o \
+	$(OBJDIR)/geometry.o \
 	$(OBJDIR)/linear_algebra.o \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/mesh.o \
-	$(OBJDIR)/position.o \
 
 RESOURCES := \
 
@@ -143,6 +143,9 @@ $(OBJDIR)/display.o: src/display.cpp
 $(OBJDIR)/dxfreader.o: src/dxfreader.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/geometry.o: src/geometry.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/linear_algebra.o: src/linear_algebra.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -150,9 +153,6 @@ $(OBJDIR)/main.o: src/main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/mesh.o: src/mesh.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/position.o: src/position.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

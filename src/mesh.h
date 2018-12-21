@@ -2,9 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "position.h"
 #include "2d.h"
-#include "display.h"
 
 #define epsilon 1.0e-14
 #define area_threshold 1.0e-3
@@ -159,251 +157,23 @@ inline int number_of_unused_edges(edge *E, int n)
 	return count;
 }
 
-//updated on 23/8/18
-//Before forming a new edge to create a triangle checks whether an edge is already present in the location
-//This function is only used by generate_mesh_basic
-inline edge *edge_exists(edge *E, int n, edge e)
-{
-	for (int i = 0; i < n; i++)
-	{
-		if ((E[i].start->p == e.start->p && E[i].end->p == e.end->p) || (E[i].start->p == e.end->p && E[i].end->p == e.start->p))
-		{
-			return &E[i];
-		}
-	}
-	return 0;
-}
+edge *edge_exists(edge *E, int n, edge e);
 
-//updated on 23/8/18
-//When a triangle is formed between two adjacent edges their common node is diabled
-//This function is only used by generate_mesh_basic
-inline void disable_common_node(edge *a, edge *b)
-{
-	if (a->start->p == b->start->p)
-		b->start->availability = false;
-	else if (a->end->p == b->start->p)
-		b->start->availability = false;
-	else if (a->start->p == b->end->p)
-		b->end->availability = false;
-	else if (a->end->p == b->end->p)
-		b->end->availability = false;
-}
+void disable_common_node(edge *a, edge *b);
 
-//updated on 23/8/18
-//Generates an array of unique nodes from a node's shared triangles
-//This function is only used by node_insertion
-inline void generate_unique_pos(node &n, pos *p)
-{
-	int count = 0;
-	pos temp;
-	for (int i = 0; i < n.share; i++)
-	{
-		if (count == 0)
-		{
-			p[count] = n.T[i]->a->p;
-			count++;
-			p[count] = n.T[i]->b->p;
-			count++;
-			p[count] = n.T[i]->c->p;
-			count++;
-		}
+void generate_unique_pos(node &n, pos *p);
 
-		temp = n.T[i]->a->p;
-		if (unique_pos(temp, p, count))
-		{
-			p[count] = temp;
-			count++;
-		}
+std::pair<node *, node *> corner_pos(const node &n);
 
-		temp = n.T[i]->b->p;
-		if (unique_pos(temp, p, count))
-		{
-			p[count] = temp;
-			count++;
-		}
+pos generate_centroid_for_polygon(pos *p, int n);
 
-		temp = n.T[i]->c->p;
-		if (unique_pos(temp, p, count))
-		{
-			p[count] = temp;
-			count++;
-		}
-	}
-}
 
-//updated on 23/8/18
-//Returns a pair of nodes that are on either side of the node in consideration on the boundary or on thehole
-//This function is only used by node_insertion
-inline std::pair<node *, node *> corner_pos(const node &n)
-{
-	if (n.p == n.BE[0]->start->p)
-	{
-		return std::make_pair(n.BE[0]->end, n.BE[1]->start);
-	}
+pos generate_ghost_point(triangle t, pos p);
 
-	else if (n.p == n.BE[0]->end->p)
-	{
-		return std::make_pair(n.BE[0]->start, n.BE[1]->end);
-	}
+bool connected_node(node *a, node *b);
 
-	//avoiding Wreturn-type
-	return std::make_pair(n.BE[0]->start,n.BE[1]->end);
-}
+edge find_common_edge(mesh_triangle *t1, mesh_triangle *t2);
 
-//updated on 23/8/18
-//Finds the centroid of the polygon formed by the triangles sharing a common node
-//This function is only used by node_insertion
-inline pos generate_centroid_for_polygon(pos *p, int n)
-{
-	pos result{};
+node *vertex_opposite_to_triangle_edge(mesh_triangle *t, edge e);
 
-	for (int i = 0; i < n; i++)
-	{
-		result = result + p[i];
-	}
-	result = result / n;
-	return result;
-}
-
-//updated on 23/8/18
-/*Generates a ghost point by reflecting the third vertex(not on boundary or on hole) of the triangle on the boundary
-about it's opposite side*/
-//This function is only used by generate_ghosts
-inline pos generate_ghost_point(triangle t, pos p)
-{
-	pos res;
-	double angle;
-	if (t.a == p)
-	{
-		angle = line_inclination_absolute({t.b, t.c});
-		p = p - t.b;
-		p = rotate_point(p, (2 * pi - angle));
-		res.x = p.x;
-		res.y = -p.y;
-		res = rotate_point(res, angle);
-		res = res + t.b;
-		return res;
-	}
-
-	else if (t.b == p)
-	{
-		angle = line_inclination_absolute({t.c, t.a});
-		p = p - t.c;
-		p = rotate_point(p, (2 * pi - angle));
-		res.x = p.x;
-		res.y = -p.y;
-		res = rotate_point(res, angle);
-		res = res + t.c;
-		return res;
-	}
-
-	else if (t.c == p)
-	{
-		angle = line_inclination_absolute({t.a, t.b});
-		p = p - t.a;
-		p = rotate_point(p, (2 * pi - angle));
-		res.x = p.x;
-		res.y = -p.y;
-		res = rotate_point(res, angle);
-		res = res + t.a;
-		return res;
-	}
-
-	return res;
-}
-
-//updated on 23/8/18
-//Checks whether a side of the triangle consists of only on edge element in the boundary
-//This function is only used by generate_ghosts
-inline bool connected_node(node *a, node *b)
-{
-	if (a == a->BE[0]->start && b == a->BE[0]->end)
-	{
-		return true;
-	}
-
-	else if (a == a->BE[0]->end && b == a->BE[0]->start)
-	{
-		return true;
-	}
-
-	if (a == a->BE[1]->start && b == a->BE[1]->end)
-	{
-		return true;
-	}
-
-	else if (a == a->BE[1]->end && b == a->BE[1]->start)
-	{
-		return true;
-	}
-
-	else
-	{
-		return false;
-	}
-}
-
-//updated on 23/8/18
-//Finds the common edge between two triangles if it exists else returns a edge with zero length
-//This function is only used by edge_swap
-inline edge find_common_edge(mesh_triangle *t1, mesh_triangle *t2)
-{
-
-	edge e;
-	if (((t1->a->p == t2->a->p) || (t1->a->p == t2->b->p) || (t1->a->p == t2->c->p)) && ((t1->b->p == t2->a->p) || (t1->b->p == t2->b->p) || (t1->b->p == t2->c->p)))
-	{
-		e.start = t1->a;
-		e.end = t1->b;
-		return e;
-	}
-	else if (((t1->b->p == t2->a->p) || (t1->b->p == t2->b->p) || (t1->b->p == t2->c->p)) && ((t1->c->p == t2->a->p) || (t1->c->p == t2->b->p) || (t1->c->p == t2->c->p)))
-	{
-		e.start = t1->b;
-		e.end = t1->c;
-		return e;
-	}
-	else if (((t1->c->p == t2->a->p) || (t1->c->p == t2->b->p) || (t1->c->p == t2->c->p)) && ((t1->a->p == t2->a->p) || (t1->a->p == t2->b->p) || (t1->a->p == t2->c->p)))
-	{
-		e.start = t1->c;
-		e.end = t1->a;
-		return e;
-	}
-	else
-	{
-		node a, b;
-		a = {};
-		b = {};
-		e.start = &a;
-		e.end = &b;
-		return e;
-	}
-}
-
-//updated on 23/8/18
-//Finds the vertex opposite to the common edge
-//This function is only used by edge_swap
-inline node *vertex_opposite_to_triangle_edge(mesh_triangle *t, edge e)
-{
-	if (t->a->p != e.start->p && t->a->p != e.end->p)
-		return t->a;
-	else if (t->b->p != e.start->p && t->b->p != e.end->p)
-		return t->b;
-	else if (t->c->p != e.start->p && t->c->p != e.end->p)
-		return t->c;
-	
-	return nullptr;
-}
-
-inline int find_triangle_containing_edge(edge &e)
-{
-	int id = -1;
-	for (int i = 0; i < e.start->share; i++)
-		for (int j = 0; j < e.end->share; j++)
-		{
-			if (e.start->T[i]->id == e.end->T[j]->id)
-			{
-				id = e.end->T[j]->id;
-			}
-		}
-	return id;
-}
+int find_triangle_containing_edge(edge &e);

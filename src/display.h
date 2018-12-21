@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "position.h"
+#include "geometry.h"
 
 extern bool return_to_console;
 extern bool cursor_inside;
