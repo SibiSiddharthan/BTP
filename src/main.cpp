@@ -47,7 +47,7 @@ void input(_2D_ &boundary, mesh &M)
 
 		case 4:
 		{
-			M.edge_swap();
+			//M.edge_swap();
 			M.display();
 		}
 		break;
@@ -82,7 +82,7 @@ void input(_2D_ &boundary, mesh &M)
 
 		case 9:
 		{
-			M.generate_ghosts();
+			//M.generate_ghosts();
 			M.display();
 		}
 		break;
@@ -134,7 +134,6 @@ int main()
 
 	_2D_ boundary;
 	mesh M;
-	boundary.init();
 	boundary.attach_window(window);
 	boundary.add_boundary_circle(0.6, 0.1);
 	//boundary.add_hole_square({ 0,0,0 }, 0.4, 0.05);

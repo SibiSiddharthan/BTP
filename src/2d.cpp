@@ -3,88 +3,68 @@
 
 using namespace std;
 
-void _2D_::init()
-{
-	max_nodes = 2000;
-	max_edges = 2000;
-
-	number_of_nodes = 0;
-	number_of_edges = 0;
-
-	N = new node[max_nodes];
-	E = new edge[max_edges];
-}
-
 void _2D_::add_boundary_circle(double r, double dx)
 {
 	pos temp(r, 0);
-	int i = 1, n = number_of_nodes;
-	int e = number_of_edges;
+	int i = 1;
+	const uint64_t n = number_of_nodes();
+	const uint64_t e = number_of_edges();
 
 	while (dx * i < 2 * pi)
 	{
-		N[number_of_nodes] = {temp, node_location::boundary, true};
+		N.push_back({temp, N.size(), node_location::boundary, true});
 		temp.x = r * cos((i)*dx);
 		temp.y = r * sin((i)*dx);
 		i++;
-		++number_of_nodes;
 	}
 
-	for (int j = n; j < number_of_nodes; j++)
+	for (size_t j = n; j < number_of_nodes(); j++)
 	{
-		E[j].start = &N[j];
+		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
+		/*
+		? Need to verify
+		E[j].start = N[j].id;
 
-		if (j + 1 < number_of_nodes)
-			E[j].end = &N[j + 1];
+		if (j + 1 < number_of_nodes())
+			E[j].end = N[j + 1].id;
 		else
-			E[j].end = &N[n];
+			E[j].end = N[n].id;
 
 		E[j].availability = true;
-		E[j].location = edge_location::boundary;
-		++number_of_edges;
+		E[j].location = edge_location::boundary;*/
 	}
-	cout << "no of nodes " << number_of_nodes << endl
-		 << "no of edges " << number_of_edges << endl;
+	cout << "no of nodes " << number_of_nodes() << endl
+		 << "no of edges " << number_of_edges() << endl;
 
-	for (int i = e; i < number_of_edges; i++)
+	for (size_t i = e; i < number_of_edges(); i++)
 	{
-		E[i].start->BE.push_back(&E[i]);
-		E[i].end->BE.push_back(&E[i]);
+		N[E[i].start].BE.push_back(E[i].id);
+		N[E[i].end].BE.push_back(E[i].id);
 	}
 }
 
 void _2D_::add_boundary_square(double a, double dx)
 {
-	int c = (int)(a / dx);
+	const uint64_t c = (uint64_t)(a / dx);
 
-	int n = number_of_nodes;
-	int e = number_of_edges;
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{-a * 0.5 + i * dx, -a * 0.5}, node_location::boundary, true};
-		++number_of_nodes;
-	}
+	const uint64_t n = number_of_nodes();
+	const uint64_t e = number_of_edges();
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{-a * 0.5 + i * dx, -a * 0.5},N.size(), node_location::boundary, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{a * 0.5, i * dx - a * 0.5}, node_location::boundary, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{a * 0.5, i * dx - a * 0.5},N.size(), node_location::boundary, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{a * 0.5 - i * dx, a * 0.5}, node_location::boundary, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{a * 0.5 - i * dx, a * 0.5},N.size(), node_location::boundary, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{-a * 0.5, a * 0.5 - i * dx}, node_location::boundary, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{-a * 0.5, a * 0.5 - i * dx},N.size(), node_location::boundary, true});
 
-	for (int j = n; j < number_of_nodes; j++)
+	for (size_t j = n; j < number_of_nodes(); j++)
 	{
+		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
+		/*
 		E[j].start = &N[j];
 
 		if (j + 1 < number_of_nodes)
@@ -94,14 +74,14 @@ void _2D_::add_boundary_square(double a, double dx)
 
 		E[j].availability = true;
 		E[j].location = edge_location::boundary;
-		++number_of_edges;
+		*/
 	}
-	cout << "no of nodes " << number_of_nodes << endl
-		 << "no of edges " << number_of_edges << endl;
-	for (int i = e; i < number_of_edges; i++)
+	cout << "no of nodes " << number_of_nodes() << endl
+		 << "no of edges " << number_of_edges() << endl;
+	for (size_t i = e; i < number_of_edges(); i++)
 	{
-		E[i].start->BE.push_back(&E[i]);
-		E[i].end->BE.push_back(&E[i]);
+		N[E[i].start].BE.push_back(E[i].id);
+		N[E[i].end].BE.push_back(E[i].id);
 	}
 }
 
@@ -109,19 +89,20 @@ void _2D_::add_hole_circle(pos p, double r, double dx)
 {
 	pos temp(r + p.x, p.y);
 	int i = -1;
-	int n = number_of_nodes;
-	int e = number_of_edges;
+	const uint64_t n = number_of_nodes();
+	const uint64_t e = number_of_edges();
 	while (dx * i > -2 * 3.1415)
 	{
-		N[number_of_nodes] = {temp, node_location::hole, true};
+		N.push_back({temp, N.size(), node_location::hole, true});
 		temp.x = p.x + r * cos(i * dx);
 		temp.y = p.y + r * sin(i * dx);
 		i--;
-		++number_of_nodes;
 	}
 
-	for (int j = n; j < number_of_nodes; j++)
+	for (size_t j = n; j < number_of_nodes(); j++)
 	{
+		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
+		/*
 		E[j].start = &N[j];
 
 		if (j + 1 < number_of_nodes)
@@ -131,15 +112,15 @@ void _2D_::add_hole_circle(pos p, double r, double dx)
 
 		E[j].availability = true;
 		E[j].location = edge_location::boundary;
-		++number_of_edges;
+		*/
 	}
 
-	cout << "no of nodes " << number_of_nodes << endl
-		 << "no of edges " << number_of_edges << endl;
-	for (int i = e; i < number_of_edges; i++)
+	cout << "no of nodes " << number_of_nodes() << endl
+		 << "no of edges " << number_of_edges() << endl;
+	for (size_t i = e; i < number_of_edges(); i++)
 	{
-		E[i].start->BE.push_back(&E[i]);
-		E[i].end->BE.push_back(&E[i]);
+		N[E[i].start].BE.push_back(E[i].id);
+		N[E[i].end].BE.push_back(E[i].id);
 	}
 }
 
@@ -149,35 +130,25 @@ void _2D_::add_hole_square(pos p, double a, double dx)
 	pos lt = {p.x - (a * 0.5), p.y + (a * 0.5)};
 	pos rt = {p.x + (a * 0.5), p.y + (a * 0.5)};
 	pos rb = {p.x + (a * 0.5), p.y - (a * 0.5)};
-	int n = number_of_nodes;
-	int e = number_of_edges;
-	int c = (int)(a / dx);
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{lb.x, lb.y + i * dx}, node_location::hole, true};
-		++number_of_nodes;
-	}
+	const uint64_t n = number_of_nodes();
+	const uint64_t e = number_of_edges();
+	const uint64_t c = (uint64_t)(a / dx);
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{lb.x, lb.y + i * dx},N.size(), node_location::hole, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{lt.x + i * dx, lt.y}, node_location::hole, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{lt.x + i * dx, lt.y},N.size(), node_location::hole, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{rt.x, rt.y - i * dx}, node_location::hole, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{rt.x, rt.y - i * dx},N.size(), node_location::hole, true});
 
-	for (int i = 0; i < c; i++)
-	{
-		N[number_of_nodes] = {{rb.x - i * dx, rb.y}, node_location::hole, true};
-		++number_of_nodes;
-	}
+	for (size_t i = 0; i < c; i++)
+		N.push_back({{rb.x - i * dx, rb.y},N.size(), node_location::hole, true});
 
-	for (int j = n; j < number_of_nodes; j++)
+	for (size_t j = n; j < number_of_nodes(); j++)
 	{
+		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
+		/*
 		E[j].start = &N[j];
 
 		if (j + 1 < number_of_nodes)
@@ -187,37 +158,37 @@ void _2D_::add_hole_square(pos p, double a, double dx)
 
 		E[j].availability = true;
 		E[j].location = edge_location::boundary;
-		++number_of_edges;
+		*/
 	}
 
-	cout << "no of nodes " << number_of_nodes << endl
-		 << "no of edges " << number_of_edges << endl;
-	for (int i = e; i < number_of_edges; i++)
+	cout << "no of nodes " << number_of_nodes() << endl
+		 << "no of edges " << number_of_edges() << endl;
+	for (size_t i = e; i < number_of_edges(); i++)
 	{
-		E[i].start->BE.push_back(&E[i]);
-		E[i].end->BE.push_back(&E[i]);
+		N[E[i].start].BE.push_back(E[i].id);
+		N[E[i].end].BE.push_back(E[i].id);
 	}
 }
 
 void _2D_::display()
 {
 	float *Edata, *Ndata;
-	Edata = new float[6 * number_of_edges];
-	Ndata = new float[4 * number_of_nodes];
+	Edata = new float[6 * number_of_edges()];
+	Ndata = new float[4 * number_of_nodes()];
 
-	int k = 0;
-	for (int i = 0; i < 6 * number_of_edges; i += 6)
+	uint64_t k = 0;
+	for (size_t i = 0; i < 6 * number_of_edges(); i += 6)
 	{
 		k = i / 6;
-		Edata[i] = (float)E[k].start->p.x;
-		Edata[i + 1] = (float)E[k].start->p.y;
-		Edata[i + 2] = (float)E[k].start->p.z;
-		Edata[i + 3] = (float)E[k].end->p.x;
-		Edata[i + 4] = (float)E[k].end->p.y;
-		Edata[i + 5] = (float)E[k].end->p.z;
+		Edata[i + 0] = (float)N[E[k].start].p.x;
+		Edata[i + 1] = (float)N[E[k].start].p.y;
+		Edata[i + 2] = (float)N[E[k].start].p.z;
+		Edata[i + 3] = (float)N[E[k].end].p.x;
+		Edata[i + 4] = (float)N[E[k].end].p.y;
+		Edata[i + 5] = (float)N[E[k].end].p.z;
 	}
 
-	for (int i = 0; i < 4 * number_of_nodes; i += 4)
+	for (size_t i = 0; i < 4 * number_of_nodes(); i += 4)
 	{
 		k = i / 4;
 
@@ -235,14 +206,14 @@ void _2D_::display()
 	glBindVertexArray(vao[0]);
 	glGenBuffers(1, &bufedge);
 	glBindBuffer(GL_ARRAY_BUFFER, bufedge);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * number_of_edges, Edata, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * number_of_edges(), Edata, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
 	glBindVertexArray(vao[1]);
 	glGenBuffers(1, &bufnode);
 	glBindBuffer(GL_ARRAY_BUFFER, bufnode);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * number_of_nodes, Ndata, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * number_of_nodes(), Ndata, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
@@ -259,10 +230,10 @@ void _2D_::display()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glBindVertexArray(vao[1]);
-		glDrawArrays(GL_POINTS, 0, sizeof(float) * 4 * number_of_nodes / (sizeof(float) * 4));
+		glDrawArrays(GL_POINTS, 0, sizeof(float) * 4 * number_of_nodes() / (sizeof(float) * 4));
 
 		glBindVertexArray(vao[0]);
-		glDrawArrays(GL_LINES, 0, sizeof(float) * 6 * number_of_edges / (sizeof(float) * 2));
+		glDrawArrays(GL_LINES, 0, sizeof(float) * 6 * number_of_edges() / (sizeof(float) * 2));
 
 		glBindVertexArray(0);
 
@@ -295,14 +266,12 @@ void _2D_::dxf_read(const std::string filepath, double dx)
 	//Only works if figure is drawn counter-clockwise
 	if (transferable)
 	{
-		for (int i = 0; i < L.size(); i++)
-		{
-			N[number_of_nodes] = {L[i].start, node_location::boundary, true};
-			++number_of_nodes;
-		}
+		for (size_t i = 0; i < L.size(); i++)
+			N.push_back({L[i].start,N.size(), node_location::boundary, true});
 
-		for (int j = 0; j < number_of_nodes; j++)
+		for (size_t j = 0; j < number_of_nodes(); j++)
 		{
+			/*
 			E[j].start = &N[j];
 
 			if (j + 1 < number_of_nodes)
@@ -312,15 +281,15 @@ void _2D_::dxf_read(const std::string filepath, double dx)
 
 			E[j].availability = true;
 			E[j].location = edge_location::boundary;
-			++number_of_edges;
+			*/
 		}
 
-		cout << "no of nodes " << number_of_nodes << endl
-			 << "no of edges " << number_of_edges << endl;
-		for (int i = 0; i < number_of_edges; i++)
+		cout << "no of nodes " << number_of_nodes() << endl
+			 << "no of edges " << number_of_edges() << endl;
+		for (size_t i = 0; i < number_of_edges(); i++)
 		{
-			E[i].start->BE.push_back(&E[i]);
-			E[i].end->BE.push_back(&E[i]);
+			N[E[i].start].BE.push_back(E[i].id);
+		N[E[i].end].BE.push_back(E[i].id);
 		}
 	}
 }

@@ -16,12 +16,10 @@ enum class mesh_type
 class mesh
 {
   private:
-	node *N;
-	edge *E;
-	mesh_triangle *T;
-	tetrahedron *TH;
-	int number_of_nodes = 0, number_of_edges = 0, number_of_triangles = 0, number_of_tetrahedrons;
-	int max_nodes, max_edges, max_triangles, max_tetrahedrons;
+	std::vector<node> N;
+	std::vector<edge> E;
+	std::vector<mesh_triangle> T;
+	std::vector<tetrahedron> TH;
 	GLFWwindow *window = nullptr;
 	mesh_type type;
 	bool imported = false;
@@ -30,19 +28,84 @@ class mesh
 
 	/*Creates a new triangle appends it the array and
 		links it with its nodes	*/
-	void make_triangle(node *a, node *b, node *c, triangle_type = triangle_type::domain);
+	void make_triangle(const uint64_t , const uint64_t , const uint64_t , triangle_type = triangle_type::domain);
 
 	/*Replaces a triangle on the array with a new triangle*/
-	void replace_triangle(int id, node *a, node *b, node *c);
+	void replace_triangle(uint64_t , const uint64_t , const uint64_t , const uint64_t );
+
+	inline const uint64_t number_of_nodes()
+	{
+		return N.size();
+	}
+
+	inline const uint64_t number_of_edges()
+	{
+		return E.size();
+	}
+
+	inline const uint64_t number_of_triangles()
+	{
+		return T.size();
+	}
+
+	//updated on 23/8/18
+	//This function is only used by generate_mesh_basic
+	inline bool left_test(const edge& e, const node& n)
+	{
+		return left_test_2d({ N[e.start].p, N[e.end].p}, n.p);
+	}
+
+	//updated on 23/8/18
+	//This function is only used by generate_mesh_basic
+	inline bool collinear_test(const edge& e, const node& n)
+	{
+		return is_collinear({N[e.start].p, N[e.end].p},n.p);
+	}
+
+	//updated on 23/8/18
+	//This function is only used by generate_mesh_basic
+	inline bool intersection_test(const edge& e,const std::vector<edge>& E)
+	{
+		uint64_t count = 0;
+		for (const edge& m_e : E)
+		{
+			if (do_they_intersect({N[m_e.start].p, N[m_e.end].p}, {N[e.start].p, N[e.end].p}))
+			{
+				++count;
+				break;
+			}
+		}
+		if (count == 0)
+			return true;
+		else
+			return false;
+	}
+
+	inline const double edge_length(const edge& e)
+	{
+		return distance(N[e.start].p,N[e.end].p);
+	}
+
+	inline const double triangle_area(const mesh_triangle& m)
+	{
+		return area_of_triangle(N[m.a].p,N[m.b].p,N[m.c].p);
+	}
+
+	int64_t edge_exists(const std::vector<edge>& ,const edge& );
+	void disable_common_node(const edge& ,const edge& );
+	std::pair<uint64_t, uint64_t> corner_pos(const node &);
+	pos generate_ghost_point(triangle , pos );
+	bool connected_node(node *, node *);
+	int find_common_edge(const mesh_triangle& , const mesh_triangle& );
+	node *vertex_opposite_to_triangle_edge(mesh_triangle *, edge );
+	int find_triangle_containing_edge(edge &);
+	void triangle_node_change(const uint64_t,const uint64_t,const uint64_t);
 
   public:
 	void init_2d();
 
 	//imports from 2d object
-	friend void import_2d(mesh &, _2D_ &);
-
-	//imports from face
-	void import_face();
+	friend void import_2d(mesh &,const _2D_ &);
 
 	//imports from 3d
 	void import_3d();
@@ -65,7 +128,7 @@ class mesh
 
 	/*Swaps the edge of 2 adjacent triangles
 		if the minimum angle increasese after swapping*/
-	void edge_swap();
+	//void edge_swap();
 
 	/*Considers an inside node and changes it's
 		position to the centroid of the polygon formed
@@ -94,8 +157,6 @@ class mesh
 	//Helps to inspect the mesh closely for any defects
 	void inspect();
 
-	void input();
-
 	//Displays the number of nodes, triangle
 	//and the average area of the triangles in the mesh
 	void stats();
@@ -110,70 +171,22 @@ class mesh
 	void node_triangle_share_sweep();
 };
 
-//updated on 23/8/18
-//This function is only used by generate_mesh_basic
-inline bool left_test_2d(edge e, node n)
-{
-	return left_test_2d({e.start->p, e.end->p}, n.p);
-}
 
-//updated on 23/8/18
-//This function is only used by generate_mesh_basic
-inline bool collinear_test(edge e, node n)
-{
-	return collinear_test({e.start->p, e.end->p}, n.p);
-}
 
-//updated on 23/8/18
-//This function is only used by generate_mesh_basic
-inline bool intersection_test(edge e, edge *E, int n)
-{
-	int count = 0;
-	for (int i = 0; i < n; i++)
-	{
-		if (do_they_intersect({E[i].start->p, E[i].end->p}, {e.start->p, e.end->p}))
-		{
-			++count;
-			break;
-		}
-	}
-	if (count == 0)
-		return true;
-	else
-		return false;
-}
+
 
 //updated on 23/8/18
 //Returns the number of edges that have not been used by the basic mesh generator
 //This function is only used by generate_mesh_basic
-inline int number_of_unused_edges(edge *E, int n)
+inline uint64_t number_of_unused_edges(const std::vector<edge>& E)
 {
-	int count = 0;
-	for (int i = 0; i < n; i++)
+	uint64_t count = 0;
+	for (const edge& e :E)
 	{
-		if (E[i].availability == true)
+		if (e.availability == true)
 			count++;
 	}
 	return count;
 }
 
-edge *edge_exists(edge *E, int n, edge e);
 
-void disable_common_node(edge *a, edge *b);
-
-void generate_unique_pos(node &n, pos *p);
-
-std::pair<node *, node *> corner_pos(const node &n);
-
-pos generate_centroid_for_polygon(pos *p, int n);
-
-
-pos generate_ghost_point(triangle t, pos p);
-
-bool connected_node(node *a, node *b);
-
-edge find_common_edge(mesh_triangle *t1, mesh_triangle *t2);
-
-node *vertex_opposite_to_triangle_edge(mesh_triangle *t, edge e);
-
-int find_triangle_containing_edge(edge &e);

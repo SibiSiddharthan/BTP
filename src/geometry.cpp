@@ -3,7 +3,7 @@
 
 //useful funtions
 
-double area_of_triangle(pos a, pos b, pos c)
+const double area_of_triangle(const pos a,const pos b,const pos c)
 {
 	double l1, l2, l3, s;
 	l1 = distance(a, b);
@@ -21,7 +21,7 @@ pos rotate_point(pos p, double angle)
 	return p;
 }
 
-double line_inclination_absolute(line l)
+const double line_inclination_absolute(line l)
 {
 	pos temp = l.end - l.start;
 	if (fabs(l.end.x - l.start.x) > epsilon)
@@ -60,7 +60,7 @@ double line_inclination_absolute(line l)
 }
 
 //Returns 1 on one side -1 on other side 0 if coincident
-int side_of_point(line l, pos p)
+const int side_of_point(line l, pos p)
 {
 	double a = (p.y - l.start.y) * (l.end.x - l.start.x) - (p.x - l.start.x) * (l.end.y - l.start.y);
 
@@ -208,7 +208,7 @@ bool left_test_2d(line l, pos p)
 }
 
 //If the absolute value of the square of the area of the triangle is less than epsilon then the function returns true
-bool collinear_test(line l, pos p)
+bool is_collinear(line l, pos p)
 {
 	double sq_area;
 	double l1, l2, l3, s;

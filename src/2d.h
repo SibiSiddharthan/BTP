@@ -5,19 +5,25 @@
 class _2D_
 {
   private:
-	node *N;
-	edge *E;
-	int number_of_nodes, number_of_edges;
-	int max_nodes, max_edges;
+	std::vector<node> N;
+	std::vector<edge> E;
 	GLFWwindow *window = nullptr;
 	void intersections(std::vector<line> &, std::vector<std::pair<line, line>> &);
 	void branches_and_gaps(std::vector<line> &, std::vector<pos> &);
 	bool intersection_pass, branch_pass;
 
+	inline const uint64_t number_of_nodes()
+	{
+		return N.size();
+	}
+
+	inline const uint64_t number_of_edges()
+	{
+		return E.size();
+	}
+
   public:
 	bool transferable = true;
-	//to be changed
-	void init();
 
 	//Reads a dxf file and converts it to a more usable form
 	void dxf_read(const std::string filepath, double dx = 1.0);
@@ -47,5 +53,5 @@ class _2D_
 	void display_import_abnormalities();
 
 	//Transfers the data from the 2D class to the mesh class
-	friend void import_2d(mesh &, _2D_ &);
+	friend void import_2d(mesh &,const _2D_ &);
 };

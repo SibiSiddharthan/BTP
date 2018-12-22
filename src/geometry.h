@@ -19,22 +19,22 @@ struct triangle
 };
 
 //useful function
-inline double distance(const pos a, const pos b)
+inline const double distance(const pos a, const pos b)
 {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z));
 }
 
-inline double length_of_line(line l)
+inline const double length_of_line(const line l)
 {
 	return distance(l.start, l.end);
 }
 
-double area_of_triangle(pos a, pos b, pos c);
+const double area_of_triangle(const pos a,const pos b,const pos c);
 pos rotate_point(pos, double);			//counter-clockwise
-double line_inclination_absolute(line); //0 to 2pi
+const double line_inclination_absolute(line); //0 to 2pi
 
 //Crucial Function for checking intersections
-int side_of_point(line, pos);
+const int side_of_point(line, pos);
 bool same_line(line, line);
 bool unique_pos(pos, pos *, const int);
 bool unique_pos(pos, std::vector<pos> &);
@@ -47,7 +47,7 @@ pos intersection_point(line, line);
 bool left_test_2d(line, pos);
 
 //Checks whether a point and a line are collinear
-bool collinear_test(line, pos);
+bool is_collinear(line, pos);
 
 //Checks whether two lines intersec or not
 bool do_they_intersect(line, line);
