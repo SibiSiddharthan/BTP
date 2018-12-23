@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 #include "2d.h"
 
-#define epsilon 1.0e-14
 #define area_threshold 1.0e-3
 
 enum class mesh_type
@@ -30,8 +29,7 @@ class mesh
 		links it with its nodes	*/
 	void make_triangle(const uint64_t , const uint64_t , const uint64_t , triangle_type = triangle_type::domain);
 
-	/*Replaces a triangle on the array with a new triangle*/
-	void replace_triangle(uint64_t , const uint64_t , const uint64_t , const uint64_t );
+	void make_inside_edge(const uint64_t, const uint64_t,bool);
 
 	inline const uint64_t number_of_nodes()
 	{
@@ -93,13 +91,29 @@ class mesh
 
 	int64_t edge_exists(const std::vector<edge>& ,const edge& );
 	void disable_common_node(const edge& ,const edge& );
+
 	std::pair<uint64_t, uint64_t> corner_pos(const node &);
-	pos generate_ghost_point(triangle , pos );
+	pos generate_centroid(const std::vector<node>&);
+
+	inline double triangle_min_angle(const uint64_t t_id)
+	{
+		return min_angle_of_triangle(N[T[t_id].a].p,N[T[t_id].b].p,N[T[t_id].c].p);
+	}
+	const uint64_t vertex_opposite_to_triangle_edge(const uint64_t ,const edge & );
+
+	pos generate_ghost_point(const uint64_t , const uint64_t );
 	bool connected_node(node *, node *);
 	int find_common_edge(const mesh_triangle& , const mesh_triangle& );
-	node *vertex_opposite_to_triangle_edge(mesh_triangle *, edge );
 	int find_triangle_containing_edge(edge &);
+
 	void triangle_node_change(const uint64_t,const uint64_t,const uint64_t);
+	void edge_node_change(const uint64_t,const uint64_t,const uint64_t);
+
+	//Sweeps the entire mesh linking the triangles with it's nodes
+	void node_triangle_share_sweep();
+	void node_edge_share_sweep();
+	void edge_triangle_share_sweep();
+	void triangle_edge_share_sweep();
 
   public:
 	void init_2d();
@@ -128,7 +142,7 @@ class mesh
 
 	/*Swaps the edge of 2 adjacent triangles
 		if the minimum angle increasese after swapping*/
-	//void edge_swap();
+	void edge_swap();
 
 	/*Considers an inside node and changes it's
 		position to the centroid of the polygon formed
@@ -167,8 +181,7 @@ class mesh
 	//Returns the average area of the triangles which are near a boundary or a hole in the mesh
 	double avg_area_of_triangles_near_boundary(node_location);
 
-	//Sweeps the entire mesh linking the triangles with it's nodes
-	void node_triangle_share_sweep();
+	
 };
 
 

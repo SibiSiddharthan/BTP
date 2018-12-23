@@ -12,7 +12,6 @@ void input(_2D_ &boundary, mesh &M)
 	cout << "Enter input" << endl;
 	int a;
 	cin >> a;
-	//if (isdigit(a))
 	{
 		auto start = chrono::high_resolution_clock::now();
 		switch (a)
@@ -47,7 +46,7 @@ void input(_2D_ &boundary, mesh &M)
 
 		case 4:
 		{
-			//M.edge_swap();
+			M.edge_swap();
 			M.display();
 		}
 		break;
@@ -82,7 +81,7 @@ void input(_2D_ &boundary, mesh &M)
 
 		case 9:
 		{
-			//M.generate_ghosts();
+			M.generate_ghosts();
 			M.display();
 		}
 		break;

@@ -40,6 +40,8 @@ void _2D_::add_boundary_circle(double r, double dx)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
 		N[E[i].end].BE.push_back(E[i].id);
+		N[E[i].start].IE.push_back(E[i].id);
+		N[E[i].end].IE.push_back(E[i].id);
 	}
 }
 
@@ -82,6 +84,8 @@ void _2D_::add_boundary_square(double a, double dx)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
 		N[E[i].end].BE.push_back(E[i].id);
+		N[E[i].start].IE.push_back(E[i].id);
+		N[E[i].end].IE.push_back(E[i].id);
 	}
 }
 
@@ -121,6 +125,8 @@ void _2D_::add_hole_circle(pos p, double r, double dx)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
 		N[E[i].end].BE.push_back(E[i].id);
+		N[E[i].start].IE.push_back(E[i].id);
+		N[E[i].end].IE.push_back(E[i].id);
 	}
 }
 
@@ -167,6 +173,8 @@ void _2D_::add_hole_square(pos p, double a, double dx)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
 		N[E[i].end].BE.push_back(E[i].id);
+		N[E[i].start].IE.push_back(E[i].id);
+		N[E[i].end].IE.push_back(E[i].id);
 	}
 }
 
@@ -271,6 +279,7 @@ void _2D_::dxf_read(const std::string filepath, double dx)
 
 		for (size_t j = 0; j < number_of_nodes(); j++)
 		{
+			
 			/*
 			E[j].start = &N[j];
 
@@ -289,7 +298,9 @@ void _2D_::dxf_read(const std::string filepath, double dx)
 		for (size_t i = 0; i < number_of_edges(); i++)
 		{
 			N[E[i].start].BE.push_back(E[i].id);
-		N[E[i].end].BE.push_back(E[i].id);
+			N[E[i].end].BE.push_back(E[i].id);
+			N[E[i].start].IE.push_back(E[i].id);
+			N[E[i].end].IE.push_back(E[i].id);
 		}
 	}
 }

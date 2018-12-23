@@ -28,12 +28,12 @@ struct node
 {
 	pos p;
 	double value = 0;
-	uint64_t share = 0;
 	uint64_t id = 0;
 	node_location location;
 	bool availability;
-	std::vector<uint64_t> T;
-	std::vector<uint64_t> BE;
+	std::vector<uint64_t> T; //shared triangles
+	std::vector<uint64_t> BE; // shared boundary edges
+	std::vector<uint64_t> IE; // shared inside edges
 	node()
 	{
 		p = {};
@@ -48,6 +48,16 @@ struct node
 		location{_location},
 		availability{_availability}
 	{
+	}
+
+	inline const uint64_t triangle_share()
+	{
+		return T.size();
+	}
+
+	inline const uint64_t edge_share()
+	{
+		return IE.size();
 	}
 
 	
@@ -65,6 +75,7 @@ struct edge
 	uint64_t id;
 	edge_location location = edge_location::boundary;
 	bool availability = true;
+	std::vector<uint64_t> T;
 
 	edge()
 	{
@@ -85,9 +96,10 @@ struct edge
 
 struct mesh_triangle
 {
-	uint64_t a, b, c;
+	uint64_t a, b, c;//node id's
 	uint64_t id = 0;
 	triangle_type type = triangle_type::domain;
+	std::vector<uint64_t> E;//edge id's
 
 	mesh_triangle()
 	{
