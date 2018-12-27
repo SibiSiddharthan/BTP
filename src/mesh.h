@@ -4,8 +4,6 @@
 #include <GLFW/glfw3.h>
 #include "2d.h"
 
-#define area_threshold 1.0e-3
-
 enum class mesh_type
 {
 	_2d,
@@ -27,9 +25,9 @@ class mesh
 
 	/*Creates a new triangle appends it the array and
 		links it with its nodes	*/
-	void make_triangle(const uint64_t , const uint64_t , const uint64_t , triangle_type = triangle_type::domain);
+	void make_triangle(const node_id , const node_id , const node_id , triangle_type = triangle_type::domain);
 
-	void make_inside_edge(const uint64_t, const uint64_t,bool);
+	void make_inside_edge(const node_id, const node_id,bool);
 
 	inline const uint64_t number_of_nodes()
 	{
@@ -57,7 +55,7 @@ class mesh
 	//This function is only used by generate_mesh_basic
 	inline bool collinear_test(const edge& e, const node& n)
 	{
-		return is_collinear({N[e.start].p, N[e.end].p},n.p);
+		return !is_collinear({N[e.start].p, N[e.end].p},n.p);
 	}
 
 	//updated on 23/8/18
@@ -92,22 +90,21 @@ class mesh
 	int64_t edge_exists(const std::vector<edge>& ,const edge& );
 	void disable_common_node(const edge& ,const edge& );
 
-	std::pair<uint64_t, uint64_t> corner_pos(const node &);
+	std::pair<node_id, node_id> corner_pos(const node &);
 	pos generate_centroid(const std::vector<node>&);
 
-	inline double triangle_min_angle(const uint64_t t_id)
+	inline double triangle_min_angle(const triangle_id t_id)
 	{
 		return min_angle_of_triangle(N[T[t_id].a].p,N[T[t_id].b].p,N[T[t_id].c].p);
 	}
-	const uint64_t vertex_opposite_to_triangle_edge(const uint64_t ,const edge & );
+	const node_id vertex_opposite_to_triangle_edge(const mesh_triangle& ,const edge & );
 
-	pos generate_ghost_point(const uint64_t , const uint64_t );
+	pos generate_ghost_point(const triangle_id , const node_id);
 	bool connected_node(node *, node *);
-	int find_common_edge(const mesh_triangle& , const mesh_triangle& );
 	int find_triangle_containing_edge(edge &);
 
-	void triangle_node_change(const uint64_t,const uint64_t,const uint64_t);
-	void edge_node_change(const uint64_t,const uint64_t,const uint64_t);
+	void triangle_node_change(const triangle_id,const node_id,const node_id);
+	void edge_node_change(const edge_id,const node_id,const node_id);
 
 	//Sweeps the entire mesh linking the triangles with it's nodes
 	void node_triangle_share_sweep();

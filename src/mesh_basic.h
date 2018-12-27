@@ -1,6 +1,9 @@
 #pragma once
 #include "geometry.h"
 
+typedef uint64_t node_id, edge_id, triangle_id, tetrahedron_id;
+constexpr double area_threshold = 1.0e-3;
+
 enum class node_location
 {
 	boundary,
@@ -31,9 +34,9 @@ struct node
 	uint64_t id = 0;
 	node_location location;
 	bool availability;
-	std::vector<uint64_t> T; //shared triangles
-	std::vector<uint64_t> BE; // shared boundary edges
-	std::vector<uint64_t> IE; // shared inside edges
+	std::vector<triangle_id> T; //shared triangles
+	std::vector<edge_id> BE; // shared boundary edges
+	std::vector<edge_id> IE; // shared inside edges
 	node()
 	{
 		p = {};
@@ -75,7 +78,7 @@ struct edge
 	uint64_t id;
 	edge_location location = edge_location::boundary;
 	bool availability = true;
-	std::vector<uint64_t> T;
+	std::vector<triangle_id> T;
 
 	edge()
 	{
@@ -99,7 +102,7 @@ struct mesh_triangle
 	uint64_t a, b, c;//node id's
 	uint64_t id = 0;
 	triangle_type type = triangle_type::domain;
-	std::vector<uint64_t> E;//edge id's
+	std::vector<edge_id> E;//edge id's
 
 	mesh_triangle()
 	{

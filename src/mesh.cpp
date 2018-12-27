@@ -32,16 +32,17 @@ void import_2d(mesh &M, const _2D_ &_2d_)
 //Displays the number of nodes,number of triangles and the average area of the triangles in the mesh
 void mesh::stats()
 {
-	cout << "Number of nodes: " << N.size() << endl;
-	cout << "Number of triangles: " << T.size() << endl;
+	cout << "Number of nodes: " << number_of_nodes() << endl;
+	cout << "Number of edges: " << number_of_edges() << endl;
+	cout << "Number of triangles: " << number_of_triangles() << endl;
 	cout << "Average area of triangles: " << avg_area_of_triangles() << endl;
-
-	/*cout << "Number of edges: " << number_of_edges << endl;
+	/*
 	int count = 0;
 	for (int i = 0; i < number_of_edges; i++)
 		if (E[i].location == edge_location::boundary)
 			++count;
-	cout << "Number of edges on boundary: " << count << endl;*/
+	cout << "Number of edges on boundary: " << count << endl;
+	*/
 }
 
 //updated on 23/8/18
@@ -63,7 +64,7 @@ void mesh::generate_mesh_basic()
 			{
 				if (E[i].availability && N[j].availability && (E[i].start != N[j].id && E[i].end != N[j].id))
 				{
-					if (left_test(E[i], N[j]) && (!collinear_test(E[i], N[j])))
+					if (left_test(E[i], N[j]) && collinear_test(E[i], N[j]))
 					{
 
 						e1.start = N[j].id;
@@ -130,19 +131,19 @@ void mesh::node_insertion()
 		{
 			if (N[i].triangle_share() > 3)
 			{
-				set<uint64_t> S;
+				unordered_set<node_id> S;
 				vector<node> temp;
 				pos centroid;
-				pair<uint64_t, uint64_t> np;
-				for (const uint64_t t_id : N[i].T)
+				pair<node_id, node_id> np;
+				for (const triangle_id t_id : N[i].T)
 				{
 					S.insert(T[t_id].a);
 					S.insert(T[t_id].b);
 					S.insert(T[t_id].c);
 				}
 
-				for (const uint64_t m_id : S)
-					temp.push_back(N[m_id]);
+				for (const node_id n_id : S)
+					temp.push_back(N[n_id]);
 
 				centroid = generate_centroid(temp);
 				np = corner_pos(N[i]);
@@ -170,16 +171,19 @@ void mesh::node_insertion()
 						triangle_node_change(N[i].T[j], N[i].id, N[N.size() - 1].id);
 
 					for (size_t j = 0; j < N[i].edge_share(); j++)
-						if (E[N[i].IE[j]].location == edge_location::inside)
-							edge_node_change(N[i].IE[j], N[i].id, N[N.size() - 1].id);
+						edge_node_change(N[i].IE[j], N[i].id, N[N.size() - 1].id);
 
 					N[i].T.clear();
 					N[i].IE.clear();
 
-					N[i].IE = N[i].BE;
+					//N[i].IE = N[i].BE;
 
 					make_triangle(N[N.size() - 1].id, N[i].id, np.first);
 					make_triangle(N[N.size() - 1].id, N[i].id, np.second);
+					make_inside_edge(N[N.size()-1].id,N[i].id,false);
+					make_inside_edge(N[N.size()-1].id,N[np.first].id,false);
+					make_inside_edge(N[N.size()-1].id,N[np.second].id,false);
+
 				}
 			}
 		}
@@ -194,8 +198,8 @@ void mesh::refine_triangles()
 	uint64_t flag = 0;
 	if (avg > area_threshold)
 	{
-		do
-		{
+		//do
+		//{
 			vector<mesh_triangle> temp;
 			flag = 0;
 			for (const mesh_triangle &m_t : T)
@@ -222,7 +226,7 @@ void mesh::refine_triangles()
 				if (triangle_area(m_t) > (2 * avg))
 					++flag;
 
-		} while (flag != 0);
+		//} while (flag != 0);
 	}
 	node_triangle_share_sweep();
 }
@@ -233,13 +237,9 @@ void mesh::refine_triangles_near_boundary(node_location _location)
 
 	double avg = avg_area_of_triangles_near_boundary(_location);
 
-	uint64_t count = 0;
-	uint64_t flag = 0;
 	if (avg > area_threshold)
 	{
 		vector<mesh_triangle> temp;
-		flag = 0;
-		count = 0;
 		for (const mesh_triangle &m_t : T)
 		{
 			if (N[m_t.a].location == _location || N[m_t.b].location == _location || N[m_t.c].location == _location)
@@ -286,9 +286,9 @@ void mesh::edge_swap()
 				min_old_1 = triangle_min_angle(m_e.T[0]);
 				min_old_2 = triangle_min_angle(m_e.T[1]);
 
-				uint64_t a,b;
-				a = vertex_opposite_to_triangle_edge(m_e.T[0],m_e);
-				b = vertex_opposite_to_triangle_edge(m_e.T[1],m_e);
+				node_id a,b;
+				a = vertex_opposite_to_triangle_edge(T[m_e.T[0]],m_e);
+				b = vertex_opposite_to_triangle_edge(T[m_e.T[1]],m_e);
 
 				min_new_1 = min_angle_of_triangle(N[m_e.start].p,N[a].p,N[b].p);
 				min_new_2 = min_angle_of_triangle(N[m_e.end].p,N[a].p,N[b].p);
@@ -303,8 +303,8 @@ void mesh::edge_swap()
 				if(min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon)
 				&& fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2))<epsilon)
 				{
-					uint64_t edge_to_be_updated_0,edge_to_be_updated_1;
-					for(const uint64_t e_id : T[m_e.T[0]].E)
+					edge_id edge_to_be_updated_0,edge_to_be_updated_1;
+					for(const edge_id e_id : T[m_e.T[0]].E)
 					{
 						if(m_e.id != e_id && E[e_id].start == m_e.start)
 						{
@@ -313,7 +313,7 @@ void mesh::edge_swap()
 						} 
 					}
 				
-					for(const uint64_t e_id : T[m_e.T[1]].E)
+					for(const edge_id e_id : T[m_e.T[1]].E)
 					{
 						if(m_e.id != e_id && E[e_id].end == m_e.end)
 						{
@@ -322,11 +322,11 @@ void mesh::edge_swap()
 						} 
 					}
 
-					for(uint64_t &t_id : E[edge_to_be_updated_0].T)
+					for(triangle_id &t_id : E[edge_to_be_updated_0].T)
 						if(t_id == m_e.T[0])
 							t_id = m_e.T[1];
 
-					for(uint64_t &t_id : E[edge_to_be_updated_1].T)
+					for(triangle_id &t_id : E[edge_to_be_updated_1].T)
 						if(t_id == m_e.T[1])
 							t_id = m_e.T[0];
 
@@ -341,11 +341,11 @@ void mesh::edge_swap()
 					m_e.start = a;
 					m_e.end = b;
 
-					for(uint64_t &e_id : T[m_e.T[0]].E)
+					for(edge_id &e_id : T[m_e.T[0]].E)
 						if(e_id == edge_to_be_updated_0)
 							e_id = edge_to_be_updated_1;
 
-					for(uint64_t &e_id : T[m_e.T[1]].E)
+					for(edge_id &e_id : T[m_e.T[1]].E)
 						if(e_id == edge_to_be_updated_1)
 							e_id = edge_to_be_updated_0;
 
@@ -369,17 +369,17 @@ void mesh::centroid_shift()
 		pos centroid;
 		if (m_n.location == node_location::inside)
 		{
-			set<uint64_t> S;
+			unordered_set<node_id> S;
 			vector<node> temp;
-			for (const uint64_t t_id : m_n.T)
+			for (const triangle_id t_id : m_n.T)
 			{
 				S.insert(T[t_id].a);
 				S.insert(T[t_id].b);
 				S.insert(T[t_id].c);
 			}
 
-			for (const uint64_t m_id : S)
-				temp.push_back(N[m_id]);
+			for (const node_id n_id : S)
+				temp.push_back(N[n_id]);
 
 			m_n.p = generate_centroid(temp);
 		}
@@ -418,8 +418,8 @@ void mesh::generate_ghosts()
 		for(edge& m_e : E)
 			if(m_e.location == edge_location::boundary)
 			{
-				uint64_t node_id = vertex_opposite_to_triangle_edge(m_e.T[0],m_e);
-				pos p = generate_ghost_point(m_e.T[0],node_id);
+				node_id n_id = vertex_opposite_to_triangle_edge(T[m_e.T[0]],m_e);
+				pos p = generate_ghost_point(m_e.T[0],n_id);
 				N.push_back({p,N.size(),node_location::outside,false});
 				make_triangle(m_e.start,m_e.end,N[N.size()-1].id);
 			}
@@ -785,7 +785,7 @@ void mesh::inspect()
 a,b,c are node pointers that form the triangle
 n is the number of */
 //updated on 23/8/18
-void mesh::make_triangle(const uint64_t a, const uint64_t b, const uint64_t c, triangle_type tp)
+void mesh::make_triangle(const node_id a, const node_id b, const node_id c, triangle_type tp)
 {
 	T.push_back({a, b, c, T.size(), tp});
 
@@ -794,7 +794,7 @@ void mesh::make_triangle(const uint64_t a, const uint64_t b, const uint64_t c, t
 	N[c].T.push_back(T.size() - 1);
 }
 
-void mesh::make_inside_edge(const uint64_t start, const uint64_t end, bool availability)
+void mesh::make_inside_edge(const node_id start, const node_id end, bool availability)
 {
 	E.push_back({start, end, E.size(), edge_location::inside, availability});
 
@@ -807,7 +807,7 @@ void mesh::make_inside_edge(const uint64_t start, const uint64_t end, bool avail
 double mesh::avg_area_of_triangles()
 {
 	double res = 0;
-	for (int i = 1; i < number_of_triangles(); i++)
+	for (size_t i = 1; i < number_of_triangles(); i++)
 	{
 		res += triangle_area(T[i]);
 	}
@@ -819,7 +819,7 @@ double mesh::avg_area_of_triangles_near_boundary(node_location loc)
 {
 	double res = 0;
 	int count = 0;
-	for (int i = 1; i < number_of_triangles(); i++)
+	for (size_t i = 1; i < number_of_triangles(); i++)
 	{
 		if (N[T[i].a].location == loc || N[T[i].b].location == loc || N[T[i].c].location == loc)
 		{
@@ -920,7 +920,7 @@ void mesh::disable_common_node(const edge &a, const edge &b)
 //updated on 23/8/18
 //Returns a pair of nodes that are on either side of the node in consideration on the boundary or on thehole
 //This function is only used by node_insertion
-pair<uint64_t, uint64_t> mesh::corner_pos(const node &n)
+pair<node_id,node_id> mesh::corner_pos(const node &n)
 {
 	if (n == N[E[n.BE[0]].start])
 		return std::make_pair(E[n.BE[0]].end, E[n.BE[1]].start);
@@ -933,7 +933,7 @@ pair<uint64_t, uint64_t> mesh::corner_pos(const node &n)
 /*Generates a ghost point by reflecting the third vertex(not on boundary or on hole) of the triangle on the boundary
 about it's opposite side*/
 //This function is only used by generate_ghosts
-pos mesh::generate_ghost_point(const uint64_t t_id , const uint64_t n_id)
+pos mesh::generate_ghost_point(const triangle_id t_id , const node_id n_id)
 {
 	pos res;
 	pos p = N[n_id].p;
@@ -1046,14 +1046,14 @@ edge find_common_edge(mesh_triangle *t1, mesh_triangle *t2)
 //updated on 23/8/18
 //Finds the vertex opposite to the common edge
 //This function is only used by edge_swap
-const uint64_t mesh::vertex_opposite_to_triangle_edge(const uint64_t t_id,const edge & e)
+const node_id mesh::vertex_opposite_to_triangle_edge(const mesh_triangle& t,const edge & e)
 {
-	if (N[T[t_id].a].id != e.start && N[T[t_id].a].id != e.end)
-		return T[t_id].a;
-	else if (N[T[t_id].b].id != e.start && N[T[t_id].b].id != e.end)
-		return T[t_id].b;
+	if (N[t.a].id != e.start && N[t.a].id != e.end)
+		return t.a;
+	else if (N[t.b].id != e.start && N[t.b].id != e.end)
+		return t.b;
 	else //if (N[T[t_id].c].id != e.start && N[T[t_id].c].id != e.end)
-		return T[t_id].c;
+		return t.c;
 }
 
 
@@ -1074,7 +1074,7 @@ int find_triangle_containing_edge(edge &e)
 }
 */
 
-void mesh::triangle_node_change(const uint64_t t_id, const uint64_t fn_id, const uint64_t tn_id)
+void mesh::triangle_node_change(const triangle_id t_id, const node_id fn_id, const node_id tn_id)
 {
 
 	//N[fn_id].T.erase(remove(N[fn_id].T.begin(), N[fn_id].T.end(), t_id), N[fn_id].T.end());
@@ -1098,7 +1098,7 @@ void mesh::triangle_node_change(const uint64_t t_id, const uint64_t fn_id, const
 	}
 }
 
-void mesh::edge_node_change(const uint64_t e_id, const uint64_t fn_id, const uint64_t tn_id)
+void mesh::edge_node_change(const edge_id e_id, const node_id fn_id, const node_id tn_id)
 {
 	if (E[e_id].start == fn_id)
 	{
