@@ -1,6 +1,6 @@
 #pragma once
 #include "preprocess.h"
-#include "linear_algebra.h"
+
 
 struct pos
 {
@@ -16,18 +16,18 @@ struct pos
 inline pos operator+(const pos p, const pos q)
 {
 	pos result;
-	result.x = q.x + p.x;
-	result.y = q.y + p.y;
-	result.z = q.z + p.z;
+	result.x = p.x + q.x;
+	result.y = p.y + q.y;
+	result.z = p.z + q.z;
 	return result;
 }
 
 inline pos operator-(const pos p, const pos q)
 {
 	pos result;
-	result.x = q.x - p.x;
-	result.y = q.y - p.y;
-	result.z = q.z - p.z;
+	result.x = p.x - q.x;
+	result.y = p.y - q.y;
+	result.z = p.z - q.z;
 	return result;
 }
 
@@ -49,22 +49,18 @@ inline pos operator/(const pos p, const double x)
 	return result;
 }
 
-/*
-! Not Working
-inline pos& operator+=(pos &res, const pos p)
+inline void operator+=(pos &res, const pos p)
 {
 	res.x += p.x;
 	res.y += p.y;
 	res.z += p.z;
-	return res;
 }
 
-inline pos operator-=(pos &res, const pos p)
+inline void operator-=(pos &res, const pos p)
 {
 	res.x -= p.x;
 	res.y -= p.y;
 	res.z -= p.z;
-	return res;
 }
 
 inline void operator*=(pos &res, const double x)
@@ -81,7 +77,7 @@ inline void operator/=(pos &res, const double x)
 	res.z /= x;
 }
 
-*/
+
 inline bool operator!=(const pos a, const pos b)
 {
 	return (a.x != b.x || a.y != b.y || a.z != b.z);

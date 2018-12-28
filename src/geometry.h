@@ -1,5 +1,6 @@
 #pragma once
 #include "position.h"
+#include "linear_algebra.h"
 
 struct line
 {

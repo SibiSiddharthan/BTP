@@ -25,7 +25,6 @@ void import_2d(mesh &M, const _2D_ &_2d_)
 
 	M.N = _2d_.N;
 	M.E = _2d_.E;
-	
 }
 
 //updated on 29/8/18
@@ -72,8 +71,7 @@ void mesh::generate_mesh_basic()
 						e2.start = E[i].start;
 						e2.end = N[j].id;
 
-						if (intersection_test(e1, E) && intersection_test(e2, E)) /*&& !enclosed_node(E[i].start->p, E[i].end->p, N[j].p, N, number_of_nodes)
-							&& !edge_contains_other_nodes(e1, N, number_of_nodes) && !edge_contains_other_nodes(e2, N, number_of_nodes))*/
+						if (intersection_test(e1, E) && intersection_test(e2, E))
 						{
 							temp = distance((N[E[i].start].p + N[E[i].end].p) * 0.5, N[j].p);
 							if (temp < min_dist)
@@ -116,7 +114,6 @@ void mesh::generate_mesh_basic()
 
 				make_triangle(E[i].start, E[i].end, N[k].id);
 				E[i].availability = false;
-				//cout << area_of_triangle(T[nm - 1]) << endl;
 			}
 		}
 	}
@@ -151,22 +148,7 @@ void mesh::node_insertion()
 				if (distance((N[np.first].p + N[np.second].p) * 0.5, N[i].p) < distance((N[np.first].p + N[np.second].p) * 0.5, centroid))
 				{
 					N.push_back({centroid, N.size(), node_location::inside, false});
-
-					/*
-					!need to make it work
-					while(N[i].triangle_share()!=0)
-					{
-						triangle_node_change(N[i].T[T.size()-1], N[i].id, N[N.size() - 1].id);
-						N[i].T.pop_back();
-					}
-					*/
-					/*
-					for (size_t j = N[i].triangle_share() - 1 ;j>=0 ; j--)
-					{
-						triangle_node_change(N[i].T[j], N[i].id, N[N.size() - 1].id);
-						//N[i].T.pop_back();
-					}
-					*/
+						
 					for (size_t j = 0; j < N[i].triangle_share(); j++)
 						triangle_node_change(N[i].T[j], N[i].id, N[N.size() - 1].id);
 
@@ -176,19 +158,17 @@ void mesh::node_insertion()
 					N[i].T.clear();
 					N[i].IE.clear();
 
-					//N[i].IE = N[i].BE;
-
 					make_triangle(N[N.size() - 1].id, N[i].id, np.first);
 					make_triangle(N[N.size() - 1].id, N[i].id, np.second);
-					make_inside_edge(N[N.size()-1].id,N[i].id,false);
-					make_inside_edge(N[N.size()-1].id,N[np.first].id,false);
-					make_inside_edge(N[N.size()-1].id,N[np.second].id,false);
-
+					make_inside_edge(N[N.size() - 1].id, N[i].id, false);
+					make_inside_edge(N[N.size() - 1].id, N[np.first].id, false);
+					make_inside_edge(N[N.size() - 1].id, N[np.second].id, false);
 				}
 			}
 		}
 	}
 }
+
 
 //updated on 23/8/18
 void mesh::refine_triangles()
@@ -198,8 +178,8 @@ void mesh::refine_triangles()
 	uint64_t flag = 0;
 	if (avg > area_threshold)
 	{
-		//do
-		//{
+		do
+		{
 			vector<mesh_triangle> temp;
 			flag = 0;
 			for (const mesh_triangle &m_t : T)
@@ -217,16 +197,14 @@ void mesh::refine_triangles()
 					make_inside_edge(N[N.size() - 1].id, m_t.c, false);
 				}
 				else
-					temp.push_back(m_t);
+					temp.push_back({m_t.a, m_t.b, m_t.c, temp.size()});
 			}
 
 			T = temp;
-
 			for (const mesh_triangle &m_t : T)
 				if (triangle_area(m_t) > (2 * avg))
 					++flag;
-
-		//} while (flag != 0);
+		} while (flag != 0);
 	}
 	node_triangle_share_sweep();
 }
@@ -257,17 +235,16 @@ void mesh::refine_triangles_near_boundary(node_location _location)
 					make_inside_edge(N[N.size() - 1].id, m_t.c, false);
 				}
 				else
-					temp.push_back(m_t);
+					temp.push_back({m_t.a, m_t.b, m_t.c, temp.size()});
 			}
 			else
-				temp.push_back(m_t);
+				temp.push_back({m_t.a, m_t.b, m_t.c, temp.size()});
 		}
 
 		T = temp;
 	}
 	node_triangle_share_sweep();
 }
-
 
 //updated on 23/8/18
 void mesh::edge_swap()
@@ -278,56 +255,56 @@ void mesh::edge_swap()
 	do
 	{
 		flag = 0;
-		for(edge & m_e:E)
+		for (edge &m_e : E)
 		{
-			if(m_e.location == edge_location::inside)
+			if (m_e.location == edge_location::inside)
 			{
-				double min_old_1,min_new_1,min_old_2,min_new_2;
+				double min_old_1, min_new_1, min_old_2, min_new_2;
 				min_old_1 = triangle_min_angle(m_e.T[0]);
 				min_old_2 = triangle_min_angle(m_e.T[1]);
 
-				node_id a,b;
-				a = vertex_opposite_to_triangle_edge(T[m_e.T[0]],m_e);
-				b = vertex_opposite_to_triangle_edge(T[m_e.T[1]],m_e);
+				node_id a, b;
+				a = vertex_opposite_to_triangle_edge(T[m_e.T[0]], m_e);
+				b = vertex_opposite_to_triangle_edge(T[m_e.T[1]], m_e);
 
-				min_new_1 = min_angle_of_triangle(N[m_e.start].p,N[a].p,N[b].p);
-				min_new_2 = min_angle_of_triangle(N[m_e.end].p,N[a].p,N[b].p);
+				min_new_1 = min_angle_of_triangle(N[m_e.start].p, N[a].p, N[b].p);
+				min_new_2 = min_angle_of_triangle(N[m_e.end].p, N[a].p, N[b].p);
 
-				double area_old_1,area_old_2,area_new_1,area_new_2;
+				double area_old_1, area_old_2, area_new_1, area_new_2;
 				area_old_1 = triangle_area(T[m_e.T[0]]);
 				area_old_2 = triangle_area(T[m_e.T[1]]);
 
-				area_new_1 = area_of_triangle(N[m_e.start].p,N[a].p,N[b].p);
-				area_new_2 = area_of_triangle(N[m_e.end].p,N[a].p,N[b].p);
+				area_new_1 = area_of_triangle(N[m_e.start].p, N[a].p, N[b].p);
+				area_new_2 = area_of_triangle(N[m_e.end].p, N[a].p, N[b].p);
 
-				if(min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon)
-				&& fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2))<epsilon)
+				if (min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon) &&//
+						fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2)) < epsilon)
 				{
-					edge_id edge_to_be_updated_0,edge_to_be_updated_1;
-					for(const edge_id e_id : T[m_e.T[0]].E)
+					edge_id edge_to_be_updated_0, edge_to_be_updated_1;
+					for (const edge_id e_id : T[m_e.T[0]].E)
 					{
-						if(m_e.id != e_id && E[e_id].start == m_e.start)
+						if (m_e.id != e_id && (E[e_id].start == m_e.start || E[e_id].end == m_e.start))
 						{
 							edge_to_be_updated_0 = e_id;
 							break;
-						} 
+						}
 					}
-				
-					for(const edge_id e_id : T[m_e.T[1]].E)
+
+					for (const edge_id e_id : T[m_e.T[1]].E)
 					{
-						if(m_e.id != e_id && E[e_id].end == m_e.end)
+						if (m_e.id != e_id && (E[e_id].end == m_e.end || E[e_id].start == m_e.end))
 						{
 							edge_to_be_updated_1 = e_id;
 							break;
-						} 
+						}
 					}
 
-					for(triangle_id &t_id : E[edge_to_be_updated_0].T)
-						if(t_id == m_e.T[0])
+					for (triangle_id &t_id : E[edge_to_be_updated_0].T)
+						if (t_id == m_e.T[0])
 							t_id = m_e.T[1];
 
-					for(triangle_id &t_id : E[edge_to_be_updated_1].T)
-						if(t_id == m_e.T[1])
+					for (triangle_id &t_id : E[edge_to_be_updated_1].T)
+						if (t_id == m_e.T[1])
 							t_id = m_e.T[0];
 
 					T[m_e.T[0]].a = a;
@@ -341,25 +318,23 @@ void mesh::edge_swap()
 					m_e.start = a;
 					m_e.end = b;
 
-					for(edge_id &e_id : T[m_e.T[0]].E)
-						if(e_id == edge_to_be_updated_0)
+					for (edge_id &e_id : T[m_e.T[0]].E)
+						if (e_id == edge_to_be_updated_0)
 							e_id = edge_to_be_updated_1;
 
-					for(edge_id &e_id : T[m_e.T[1]].E)
-						if(e_id == edge_to_be_updated_1)
+					for (edge_id &e_id : T[m_e.T[1]].E)
+						if (e_id == edge_to_be_updated_1)
 							e_id = edge_to_be_updated_0;
 
 					flag++;
 				}
 			}
 		}
-	
+
 	} while (flag != 0);
 	node_triangle_share_sweep();
-
+	node_edge_share_sweep();
 }
-
-
 
 //updated on 23/8/18
 void mesh::centroid_shift()
@@ -407,7 +382,6 @@ void mesh::generate_mesh_full()
 	centroid_shift();
 }
 
-
 //updated on 23/8/18
 void mesh::generate_ghosts()
 {
@@ -415,18 +389,17 @@ void mesh::generate_ghosts()
 	{
 		edge_triangle_share_sweep();
 
-		for(edge& m_e : E)
-			if(m_e.location == edge_location::boundary)
+		for (edge &m_e : E)
+			if (m_e.location == edge_location::boundary)
 			{
-				node_id n_id = vertex_opposite_to_triangle_edge(T[m_e.T[0]],m_e);
-				pos p = generate_ghost_point(m_e.T[0],n_id);
-				N.push_back({p,N.size(),node_location::outside,false});
-				make_triangle(m_e.start,m_e.end,N[N.size()-1].id);
+				node_id n_id = vertex_opposite_to_triangle_edge(T[m_e.T[0]], m_e);
+				pos p = generate_ghost_point(m_e.T[0], n_id);
+				N.push_back({p, N.size(), node_location::outside, false});
+				make_triangle(m_e.start, m_e.end, N[N.size() - 1].id);
 			}
 	}
 	ghost_generated = true;
 }
-
 
 //updated on 23/8/18
 void mesh::imp_display()
@@ -802,7 +775,6 @@ void mesh::make_inside_edge(const node_id start, const node_id end, bool availab
 	N[end].IE.push_back(E.size() - 1);
 }
 
-
 //updated on 23/8/18
 double mesh::avg_area_of_triangles()
 {
@@ -851,41 +823,51 @@ void mesh::node_edge_share_sweep()
 
 	for (const edge &m_e : E)
 	{
-		N[m_e.start].IE.push_back(m_e.id);
-		N[m_e.end].T.push_back(m_e.id);
+		if (m_e.location == edge_location::inside)
+		{
+			N[m_e.start].IE.push_back(m_e.id);
+			N[m_e.end].IE.push_back(m_e.id);
+		}
 	}
 }
 
 void mesh::edge_triangle_share_sweep()
 {
+	for(edge &m_e : E)
+		m_e.T.clear();
+
 	for (edge &m_e : E)
 	{
 		uint64_t count = 0;
-		unordered_map<uint64_t, bool> triangle_track;
-		for (const uint64_t i : N[m_e.start].T)
-			triangle_track[i] = true;
+		unordered_set<triangle_id> triangle_track;
+		for (const triangle_id t_id : N[m_e.start].T)
+			triangle_track.insert(t_id);
 
-		for (const uint64_t i : N[m_e.end].T)
+		for (const triangle_id t_id : N[m_e.end].T)
 		{
-			if (triangle_track.find(i) != triangle_track.end())
+			if (triangle_track.find(t_id) != triangle_track.end())
 			{
-				m_e.T.push_back(i);
+				m_e.T.push_back(t_id);
 				++count;
 			}
 
-			if(count ==2 && m_e.location == edge_location::inside) break;
-			else if(count==1 && m_e.location == edge_location::boundary) break;
+			if (count == 2 && m_e.location == edge_location::inside)
+				break;
+			else if (count == 1 && m_e.location == edge_location::boundary)
+				break;
 		}
 	}
 }
 
 void mesh::triangle_edge_share_sweep()
 {
-	for(const edge& m_e : E)
-	{
-		for(const uint64_t t_id : m_e.T)
-			T[t_id].E.push_back(m_e.id);
+	for(mesh_triangle &m_t : T)
+		m_t.E.clear();
 
+	for (const edge &m_e : E)
+	{
+		for (const triangle_id t_id : m_e.T)
+			T[t_id].E.push_back(m_e.id);
 	}
 }
 
@@ -920,7 +902,7 @@ void mesh::disable_common_node(const edge &a, const edge &b)
 //updated on 23/8/18
 //Returns a pair of nodes that are on either side of the node in consideration on the boundary or on thehole
 //This function is only used by node_insertion
-pair<node_id,node_id> mesh::corner_pos(const node &n)
+pair<node_id, node_id> mesh::corner_pos(const node &n)
 {
 	if (n == N[E[n.BE[0]].start])
 		return std::make_pair(E[n.BE[0]].end, E[n.BE[1]].start);
@@ -933,7 +915,7 @@ pair<node_id,node_id> mesh::corner_pos(const node &n)
 /*Generates a ghost point by reflecting the third vertex(not on boundary or on hole) of the triangle on the boundary
 about it's opposite side*/
 //This function is only used by generate_ghosts
-pos mesh::generate_ghost_point(const triangle_id t_id , const node_id n_id)
+pos mesh::generate_ghost_point(const triangle_id t_id, const node_id n_id)
 {
 	pos res;
 	pos p = N[n_id].p;
@@ -941,34 +923,34 @@ pos mesh::generate_ghost_point(const triangle_id t_id , const node_id n_id)
 	if (T[t_id].a == n_id)
 	{
 		angle = line_inclination_absolute({N[T[t_id].b].p, N[T[t_id].c].p});
-		p = p - N[T[t_id].b].p;
+		p -= N[T[t_id].b].p;
 		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);
-		res = res + N[T[t_id].b].p;
+		res += N[T[t_id].b].p;
 	}
 
 	else if (T[t_id].b == n_id)
 	{
 		angle = line_inclination_absolute({N[T[t_id].c].p, N[T[t_id].a].p});
-		p = p - N[T[t_id].c].p;
+		p -= N[T[t_id].c].p;
 		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);
-		res = res + N[T[t_id].c].p;
+		res += N[T[t_id].c].p;
 	}
 
 	else //if (T[t_id].c == n_id)
 	{
 		angle = line_inclination_absolute({N[T[t_id].a].p, N[T[t_id].b].p});
-		p = p - N[T[t_id].a].p;
+		p -= N[T[t_id].a].p;
 		p = rotate_point(p, (2 * pi - angle));
 		res.x = p.x;
 		res.y = -p.y;
 		res = rotate_point(res, angle);
-		res = res + N[T[t_id].a].p;
+		res += N[T[t_id].a].p;
 	}
 
 	return res;
@@ -978,75 +960,15 @@ pos mesh::generate_centroid(const std::vector<node> &m_N)
 {
 	pos centroid;
 	for (const node &n : m_N)
-		centroid = centroid + n.p;
+		centroid += n.p;
 
 	return centroid / m_N.size();
 }
 
-/*
-//updated on 23/8/18
-//Checks whether a side of the triangle consists of only on edge element in the boundary
-//This function is only used by generate_ghosts
-bool connected_node(node *a, node *b)
-{
-	if (a == a->BE[0]->start && b == a->BE[0]->end)
-		return true;
-
-	else if (a == a->BE[0]->end && b == a->BE[0]->start)
-		return true;
-
-	if (a == a->BE[1]->start && b == a->BE[1]->end)
-		return true;
-
-	else if (a == a->BE[1]->end && b == a->BE[1]->start)
-		return true;
-
-	else
-		return false;
-}
-*/
-/*
-! Need to update edge swap
-//updated on 23/8/18
-//Finds the common edge between two triangles if it exists else returns a edge with zero length
-//This function is only used by edge_swap
-edge find_common_edge(mesh_triangle *t1, mesh_triangle *t2)
-{
-
-	edge e;
-	if (((t1->a->p == t2->a->p) || (t1->a->p == t2->b->p) || (t1->a->p == t2->c->p)) && ((t1->b->p == t2->a->p) || (t1->b->p == t2->b->p) || (t1->b->p == t2->c->p)))
-	{
-		e.start = t1->a;
-		e.end = t1->b;
-		return e;
-	}
-	else if (((t1->b->p == t2->a->p) || (t1->b->p == t2->b->p) || (t1->b->p == t2->c->p)) && ((t1->c->p == t2->a->p) || (t1->c->p == t2->b->p) || (t1->c->p == t2->c->p)))
-	{
-		e.start = t1->b;
-		e.end = t1->c;
-		return e;
-	}
-	else if (((t1->c->p == t2->a->p) || (t1->c->p == t2->b->p) || (t1->c->p == t2->c->p)) && ((t1->a->p == t2->a->p) || (t1->a->p == t2->b->p) || (t1->a->p == t2->c->p)))
-	{
-		e.start = t1->c;
-		e.end = t1->a;
-		return e;
-	}
-	else
-	{
-		node a, b;
-		a = {};
-		b = {};
-		e.start = &a;
-		e.end = &b;
-		return e;
-	}
-}
-*/
 //updated on 23/8/18
 //Finds the vertex opposite to the common edge
 //This function is only used by edge_swap
-const node_id mesh::vertex_opposite_to_triangle_edge(const mesh_triangle& t,const edge & e)
+const node_id mesh::vertex_opposite_to_triangle_edge(const mesh_triangle &t, const edge &e)
 {
 	if (N[t.a].id != e.start && N[t.a].id != e.end)
 		return t.a;
@@ -1055,24 +977,6 @@ const node_id mesh::vertex_opposite_to_triangle_edge(const mesh_triangle& t,cons
 	else //if (N[T[t_id].c].id != e.start && N[T[t_id].c].id != e.end)
 		return t.c;
 }
-
-
-/*
-? Not used anywhere currently
-int find_triangle_containing_edge(edge &e)
-{
-	int id = -1;
-	for (int i = 0; i < e.start->triangle_share(); i++)
-		for (int j = 0; j < e.end->triangle_share(); j++)
-		{
-			if (e.start->T[i]->id == e.end->T[j]->id)
-			{
-				id = e.end->T[j]->id;
-			}
-		}
-	return id;
-}
-*/
 
 void mesh::triangle_node_change(const triangle_id t_id, const node_id fn_id, const node_id tn_id)
 {

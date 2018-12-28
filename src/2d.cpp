@@ -19,20 +19,8 @@ void _2D_::add_boundary_circle(double r, double dx)
 	}
 
 	for (size_t j = n; j < number_of_nodes(); j++)
-	{
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
-		/*
-		? Need to verify
-		E[j].start = N[j].id;
-
-		if (j + 1 < number_of_nodes())
-			E[j].end = N[j + 1].id;
-		else
-			E[j].end = N[n].id;
-
-		E[j].availability = true;
-		E[j].location = edge_location::boundary;*/
-	}
+	
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
 
@@ -62,20 +50,8 @@ void _2D_::add_boundary_square(double a, double dx)
 		N.push_back({{-a * 0.5, a * 0.5 - i * dx},N.size(), node_location::boundary, true});
 
 	for (size_t j = n; j < number_of_nodes(); j++)
-	{
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
-		/*
-		E[j].start = &N[j];
-
-		if (j + 1 < number_of_nodes)
-			E[j].end = &N[j + 1];
-		else
-			E[j].end = &N[n];
-
-		E[j].availability = true;
-		E[j].location = edge_location::boundary;
-		*/
-	}
+	
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
 	for (size_t i = e; i < number_of_edges(); i++)
@@ -100,20 +76,7 @@ void _2D_::add_hole_circle(pos p, double r, double dx)
 	}
 
 	for (size_t j = n; j < number_of_nodes(); j++)
-	{
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
-		/*
-		E[j].start = &N[j];
-
-		if (j + 1 < number_of_nodes)
-			E[j].end = &N[j + 1];
-		else
-			E[j].end = &N[n];
-
-		E[j].availability = true;
-		E[j].location = edge_location::boundary;
-		*/
-	}
 
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
@@ -146,20 +109,7 @@ void _2D_::add_hole_square(pos p, double a, double dx)
 		N.push_back({{rb.x - i * dx, rb.y},N.size(), node_location::hole, true});
 
 	for (size_t j = n; j < number_of_nodes(); j++)
-	{
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id),E.size(), edge_location::boundary,true});
-		/*
-		E[j].start = &N[j];
-
-		if (j + 1 < number_of_nodes)
-			E[j].end = &N[j + 1];
-		else
-			E[j].end = &N[n];
-
-		E[j].availability = true;
-		E[j].location = edge_location::boundary;
-		*/
-	}
 
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;

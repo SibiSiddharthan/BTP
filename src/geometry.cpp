@@ -155,7 +155,7 @@ and checks whether the point is on the left or right side of the line
 
 bool left_test_2d(line l, pos p)
 {
-	p = p - l.start;
+	p -= l.start;
 	pos temp = l.end - l.start;
 	if (fabs(l.end.x - l.start.x) > epsilon) // Not 90 degree
 	{
