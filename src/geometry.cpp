@@ -125,7 +125,9 @@ bool do_they_intersect(line a, line b)
 		if (!(side_of_point(a, b.start) == 0 && side_of_point(a, b.end) == 0 && //concurrent line segments
 			  side_of_point(b, a.start) == 0 && side_of_point(b, a.end) == 0))
 		{
-			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) || (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) || (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
+			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) ||//
+			 (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) || //
+			 (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
 				return true;
 
 			else

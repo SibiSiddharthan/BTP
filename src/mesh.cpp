@@ -779,26 +779,23 @@ void mesh::make_inside_edge(const node_id start, const node_id end, bool availab
 double mesh::avg_area_of_triangles()
 {
 	double res = 0;
-	for (size_t i = 1; i < number_of_triangles(); i++)
-	{
-		res += triangle_area(T[i]);
-	}
-	return res / (number_of_triangles() * 1.0);
+	for (const mesh_triangle & m_t: T)
+		res += triangle_area(m_t);
+	
+	return res / number_of_triangles() ;
 }
 
 //updated on 23/8/18
 double mesh::avg_area_of_triangles_near_boundary(node_location loc)
 {
 	double res = 0;
-	int count = 0;
-	for (size_t i = 1; i < number_of_triangles(); i++)
-	{
-		if (N[T[i].a].location == loc || N[T[i].b].location == loc || N[T[i].c].location == loc)
+	uint64_t count = 0;
+	for (const mesh_triangle & m_t: T)
+		if (N[m_t.a].location == loc || N[m_t.b].location == loc || N[m_t.c].location == loc)
 		{
-			res += triangle_area(T[i]);
+			res += triangle_area(m_t);
 			++count;
 		}
-	}
 	return res / count;
 }
 
@@ -980,9 +977,6 @@ const node_id mesh::vertex_opposite_to_triangle_edge(const mesh_triangle &t, con
 
 void mesh::triangle_node_change(const triangle_id t_id, const node_id fn_id, const node_id tn_id)
 {
-
-	//N[fn_id].T.erase(remove(N[fn_id].T.begin(), N[fn_id].T.end(), t_id), N[fn_id].T.end());
-
 	if (T[t_id].a == fn_id)
 	{
 		T[t_id].a = tn_id;

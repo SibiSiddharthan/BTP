@@ -100,8 +100,6 @@ class mesh
 	const node_id vertex_opposite_to_triangle_edge(const mesh_triangle& ,const edge & );
 
 	pos generate_ghost_point(const triangle_id , const node_id);
-	bool connected_node(node *, node *);
-	int find_triangle_containing_edge(edge &);
 
 	void triangle_node_change(const triangle_id,const node_id,const node_id);
 	void edge_node_change(const edge_id,const node_id,const node_id);
@@ -154,7 +152,6 @@ class mesh
 
 	//Generates ghost triangles
 	void generate_ghosts();
-	void generate_ghosts_new();
 
 	inline void attach_window(GLFWwindow *_window)
 	{

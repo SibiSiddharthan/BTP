@@ -1,5 +1,3 @@
-//#include"laplace.h"
-//#include"output.h"
 #include "mesh.h"
 
 using namespace std;
