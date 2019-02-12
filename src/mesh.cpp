@@ -8,8 +8,8 @@ pos p;
 double dx;
 double dy;
 double dz;
-double zoom;
-double zoom_change;
+float zoom;
+float zoom_change;
 
 using namespace std;
 
@@ -35,13 +35,6 @@ void mesh::stats()
 	cout << "Number of edges: " << number_of_edges() << endl;
 	cout << "Number of triangles: " << number_of_triangles() << endl;
 	cout << "Average area of triangles: " << avg_area_of_triangles() << endl;
-	/*
-	int count = 0;
-	for (int i = 0; i < number_of_edges; i++)
-		if (E[i].location == edge_location::boundary)
-			++count;
-	cout << "Number of edges on boundary: " << count << endl;
-	*/
 }
 
 //updated on 23/8/18
@@ -148,7 +141,7 @@ void mesh::node_insertion()
 				if (distance((N[np.first].p + N[np.second].p) * 0.5, N[i].p) < distance((N[np.first].p + N[np.second].p) * 0.5, centroid))
 				{
 					N.push_back({centroid, N.size(), node_location::inside, false});
-						
+
 					for (size_t j = 0; j < N[i].triangle_share(); j++)
 						triangle_node_change(N[i].T[j], N[i].id, N[N.size() - 1].id);
 
@@ -168,7 +161,6 @@ void mesh::node_insertion()
 		}
 	}
 }
-
 
 //updated on 23/8/18
 void mesh::refine_triangles()
@@ -277,8 +269,8 @@ void mesh::edge_swap()
 				area_new_1 = area_of_triangle(N[m_e.start].p, N[a].p, N[b].p);
 				area_new_2 = area_of_triangle(N[m_e.end].p, N[a].p, N[b].p);
 
-				if (min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon) &&//
-						fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2)) < epsilon)
+				if (min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon) && //
+					fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2)) < epsilon)
 				{
 					edge_id edge_to_be_updated_0, edge_to_be_updated_1;
 					for (const edge_id e_id : T[m_e.T[0]].E)
@@ -395,86 +387,10 @@ void mesh::generate_ghosts()
 				node_id n_id = vertex_opposite_to_triangle_edge(T[m_e.T[0]], m_e);
 				pos p = generate_ghost_point(m_e.T[0], n_id);
 				N.push_back({p, N.size(), node_location::outside, false});
-				make_triangle(m_e.start, m_e.end, N[N.size() - 1].id);
+				make_triangle(m_e.start, m_e.end, N[N.size() - 1].id, triangle_type::ghost);
 			}
 	}
 	ghost_generated = true;
-}
-
-//updated on 23/8/18
-void mesh::imp_display()
-{
-	float *Edata, *Ndata;
-	Edata = new float[6 * number_of_edges()];
-	Ndata = new float[4 * number_of_nodes()];
-
-	uint64_t k = 0;
-	for (size_t i = 0; i < 6 * number_of_edges(); i += 6)
-	{
-		k = i / 6;
-		Edata[i + 0] = (float)N[E[k].start].p.x;
-		Edata[i + 1] = (float)N[E[k].start].p.y;
-		Edata[i + 2] = (float)N[E[k].start].p.z;
-		Edata[i + 3] = (float)N[E[k].end].p.x;
-		Edata[i + 4] = (float)N[E[k].end].p.y;
-		Edata[i + 5] = (float)N[E[k].end].p.z;
-	}
-
-	for (size_t i = 0; i < 4 * number_of_nodes(); i += 4)
-	{
-		k = i / 4;
-
-		Ndata[i] = N[k].p.x;
-		Ndata[i + 1] = N[k].p.y;
-		Ndata[i + 2] = N[k].p.z;
-		Ndata[i + 3] = 5.0;
-	}
-
-	GLuint bufedge, bufnode;
-	unsigned int vao[2], test;
-
-	glGenVertexArrays(2, vao);
-
-	glBindVertexArray(vao[0]);
-	glGenBuffers(1, &bufedge);
-	glBindBuffer(GL_ARRAY_BUFFER, bufedge);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * number_of_edges(), Edata, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-
-	glBindVertexArray(vao[1]);
-	glGenBuffers(1, &bufnode);
-	glBindBuffer(GL_ARRAY_BUFFER, bufnode);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * number_of_nodes(), Ndata, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(3 * sizeof(float)));
-
-	glBindVertexArray(0);
-
-	shadersource src = parseshader("src/shaders/basic_display.glsl");
-	unsigned int shader = createshader(src.vertex, src.fragment);
-	glUseProgram(shader);
-
-	glEnable(GL_PROGRAM_POINT_SIZE);
-
-	{
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBindVertexArray(vao[1]);
-		glDrawArrays(GL_POINTS, 0, sizeof(float) * 4 * number_of_nodes() / (sizeof(float) * 4));
-
-		glBindVertexArray(vao[0]);
-		glDrawArrays(GL_LINES, 0, sizeof(float) * 6 * number_of_edges() / (sizeof(float) * 2));
-
-		glBindVertexArray(0);
-
-		glfwSwapBuffers(window);
-	}
-
-	glDeleteProgram(shader);
-	delete[] Edata;
-	delete[] Ndata;
 }
 
 //updated on 23/8/18
@@ -483,93 +399,114 @@ void mesh::display()
 	if (type == mesh_type::_2d)
 	{
 
-		float *Tdata, *Ndata;
-		Tdata = new float[18 * number_of_triangles()];
-		Ndata = new float[4 * number_of_nodes()];
+		vector<float> posdata(3 * number_of_nodes());
+		vector<GLuint> node_index(number_of_nodes());
+		vector<GLuint> triangle_index(6 * number_of_triangles());
+		vector<color> node_color(number_of_nodes());
+		vector<color> triangle_edge_color(6 * number_of_edges());
+		vector<float> node_size(number_of_nodes());
 
 		uint64_t k = 0;
-		for (size_t i = 0; i < 18 * number_of_triangles(); i += 18)
+
+		for (size_t i = 0; i < 3 * number_of_nodes(); i += 3)
 		{
-			k = i / 18;
-			Tdata[i + 0] = (float)N[T[k].a].p.x;
-			Tdata[i + 1] = (float)N[T[k].a].p.y;
-			Tdata[i + 2] = (float)N[T[k].a].p.z;
-			Tdata[i + 3] = (float)N[T[k].b].p.x;
-			Tdata[i + 4] = (float)N[T[k].b].p.y;
-			Tdata[i + 5] = (float)N[T[k].b].p.z;
-
-			Tdata[i + 6] = (float)N[T[k].b].p.x;
-			Tdata[i + 7] = (float)N[T[k].b].p.y;
-			Tdata[i + 8] = (float)N[T[k].b].p.z;
-			Tdata[i + 9] = (float)N[T[k].c].p.x;
-			Tdata[i + 10] = (float)N[T[k].c].p.y;
-			Tdata[i + 11] = (float)N[T[k].c].p.z;
-
-			Tdata[i + 12] = (float)N[T[k].c].p.x;
-			Tdata[i + 13] = (float)N[T[k].c].p.y;
-			Tdata[i + 14] = (float)N[T[k].c].p.z;
-			Tdata[i + 15] = (float)N[T[k].a].p.x;
-			Tdata[i + 16] = (float)N[T[k].a].p.y;
-			Tdata[i + 17] = (float)N[T[k].a].p.z;
+			k = i / 3;
+			posdata[i + 0] = (float)N[k].p.x;
+			posdata[i + 1] = (float)N[k].p.y;
+			posdata[i + 2] = (float)N[k].p.z;
 		}
 
-		for (size_t i = 0; i < 4 * number_of_nodes(); i += 4)
+		for (size_t i = 0; i < number_of_nodes(); ++i)
 		{
-			k = i / 4;
-
-			Ndata[i + 0] = N[k].p.x;
-			Ndata[i + 1] = N[k].p.y;
-			Ndata[i + 2] = N[k].p.z;
-
-			switch (N[k].location)
+			node_index[i] = GLuint(i);
+			switch (N[i].location)
 			{
 			case node_location::boundary:
 			{
-				Ndata[i + 3] = 1.0;
+				node_color[i] = colors("green");
+				node_size[i] = 8.0;
 			}
 			break;
+
 			case node_location::hole:
 			{
-				Ndata[i + 3] = 2.0;
+				node_color[i] = colors("green");
+				node_size[i] = 4.0;
 			}
 			break;
+
 			case node_location::inside:
 			{
-				Ndata[i + 3] = 3.0;
+				node_color[i] = colors("yellow");
+				node_size[i] = 3.0;
 			}
 			break;
+
 			case node_location::outside:
 			{
-				Ndata[i + 3] = 4.0;
+				node_color[i] = colors("purple");
+				node_size[i] = 2.0;
 			}
 			break;
-			default:
-				break;
 			}
 		}
 
-		GLuint bufmesh, bufnode;
-		unsigned int vao[2], test;
+		for (size_t i = 0; i < 6 * number_of_triangles(); i += 6)
+		{
+			k = i / 6;
+			triangle_index[i + 0] = GLuint(T[k].a);
+			triangle_index[i + 1] = GLuint(T[k].b);
 
-		glGenVertexArrays(2, vao);
+			triangle_index[i + 2] = GLuint(T[k].b);
+			triangle_index[i + 3] = GLuint(T[k].c);
 
-		glBindVertexArray(vao[0]);
-		glGenBuffers(1, &bufmesh);
-		glBindBuffer(GL_ARRAY_BUFFER, bufmesh);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18 * number_of_triangles(), Tdata, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+			triangle_index[i + 4] = GLuint(T[k].c);
+			triangle_index[i + 5] = GLuint(T[k].a);
 
-		glBindVertexArray(vao[1]);
-		glGenBuffers(1, &bufnode);
-		glBindBuffer(GL_ARRAY_BUFFER, bufnode);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * number_of_nodes(), Ndata, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(3 * sizeof(float)));
+			if (T[k].type == triangle_type::domain)
+			{
+				triangle_edge_color[i + 0] = colors("red");
+				triangle_edge_color[i + 1] = colors("red");
+				triangle_edge_color[i + 2] = colors("red");
+				triangle_edge_color[i + 3] = colors("red");
+				triangle_edge_color[i + 4] = colors("red");
+				triangle_edge_color[i + 5] = colors("red");
+			}
 
-		glBindVertexArray(0);
+			else
+			{
+				triangle_edge_color[i + 0] = colors("turquoise");
+				triangle_edge_color[i + 1] = colors("turquoise");
+				triangle_edge_color[i + 2] = colors("turquoise");
+				triangle_edge_color[i + 3] = colors("turquoise");
+				triangle_edge_color[i + 4] = colors("turquoise");
+				triangle_edge_color[i + 5] = colors("turquoise");
+			}
+		}
+
+		data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
+		vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
+
+		data_buffer cb_node(GL_ARRAY_BUFFER, node_color);
+		cb_node.configure_layout(2, 3, 3, GL_FLOAT);
+
+		data_buffer cb_triangle_edge(GL_ARRAY_BUFFER, triangle_edge_color);
+		cb_triangle_edge.configure_layout(2, 3, 3, GL_FLOAT);
+
+		data_buffer db_node_size(GL_ARRAY_BUFFER, node_size);
+		db_node_size.configure_layout(3, 1, 1, GL_FLOAT);
+
+		data_buffer ib_node(GL_ELEMENT_ARRAY_BUFFER, node_index), ib_triangle_edge(GL_ELEMENT_ARRAY_BUFFER, triangle_index);
+
+		vertex_array va_node(GL_POINTS), va_triangle_edge(GL_LINES);
+
+		va_node.bind();
+		va_node.bind_buffer({&vb_pos, &cb_node, &db_node_size, &ib_node});
+		va_node.unbind();
+
+		va_triangle_edge.bind();
+		va_triangle_edge.bind_buffer({&vb_pos, &cb_triangle_edge, &ib_triangle_edge});
+		va_triangle_edge.unbind();
 
 		shadersource src = parseshader("src/shaders/basic_display.glsl");
 		unsigned int shader = createshader(src.vertex, src.fragment);
@@ -579,20 +516,16 @@ void mesh::display()
 
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindVertexArray(vao[1]);
-			glDrawArrays(GL_POINTS, 0, sizeof(float) * 4 * number_of_nodes() / (sizeof(float) * 4));
+			va_node.bind();
+			va_node.draw();
 
-			glBindVertexArray(vao[0]);
-			glDrawArrays(GL_LINES, 0, sizeof(float) * 18 * number_of_triangles() / (sizeof(float) * 3));
-
-			glBindVertexArray(0);
+			va_triangle_edge.bind();
+			va_triangle_edge.draw();
 
 			glfwSwapBuffers(window);
 		}
 
 		glDeleteProgram(shader);
-		delete[] Tdata;
-		delete[] Ndata;
 	}
 }
 
@@ -610,93 +543,114 @@ void mesh::inspect()
 	if (type == mesh_type::_2d)
 	{
 
-		float *Tdata, *Ndata;
-		Tdata = new float[18 * number_of_triangles()];
-		Ndata = new float[4 * number_of_nodes()];
+		vector<float> posdata(3 * number_of_nodes());
+		vector<GLuint> node_index(number_of_nodes());
+		vector<GLuint> triangle_index(6 * number_of_triangles());
+		vector<color> node_color(number_of_nodes());
+		vector<color> triangle_edge_color(6 * number_of_edges());
+		vector<float> node_size(number_of_nodes());
 
-		int k = 0;
-		for (int i = 0; i < 18 * number_of_triangles(); i += 18)
+		uint64_t k = 0;
+
+		for (size_t i = 0; i < 3 * number_of_nodes(); i += 3)
 		{
-			k = i / 18;
-			Tdata[i + 0] = (float)N[T[k].a].p.x;
-			Tdata[i + 1] = (float)N[T[k].a].p.y;
-			Tdata[i + 2] = (float)N[T[k].a].p.z;
-			Tdata[i + 3] = (float)N[T[k].b].p.x;
-			Tdata[i + 4] = (float)N[T[k].b].p.y;
-			Tdata[i + 5] = (float)N[T[k].b].p.z;
-
-			Tdata[i + 6] = (float)N[T[k].b].p.x;
-			Tdata[i + 7] = (float)N[T[k].b].p.y;
-			Tdata[i + 8] = (float)N[T[k].b].p.z;
-			Tdata[i + 9] = (float)N[T[k].c].p.x;
-			Tdata[i + 10] = (float)N[T[k].c].p.y;
-			Tdata[i + 11] = (float)N[T[k].c].p.z;
-
-			Tdata[i + 12] = (float)N[T[k].c].p.x;
-			Tdata[i + 13] = (float)N[T[k].c].p.y;
-			Tdata[i + 14] = (float)N[T[k].c].p.z;
-			Tdata[i + 15] = (float)N[T[k].a].p.x;
-			Tdata[i + 16] = (float)N[T[k].a].p.y;
-			Tdata[i + 17] = (float)N[T[k].a].p.z;
+			k = i / 3;
+			posdata[i + 0] = (float)N[k].p.x;
+			posdata[i + 1] = (float)N[k].p.y;
+			posdata[i + 2] = (float)N[k].p.z;
 		}
 
-		for (int i = 0; i < 4 * number_of_nodes(); i += 4)
+		for (size_t i = 0; i < number_of_nodes(); ++i)
 		{
-			k = i / 4;
-
-			Ndata[i] = N[k].p.x;
-			Ndata[i + 1] = N[k].p.y;
-			Ndata[i + 2] = N[k].p.z;
-
-			switch (N[k].location)
+			node_index[i] = GLuint(i);
+			switch (N[i].location)
 			{
 			case node_location::boundary:
 			{
-				Ndata[i + 3] = 1.0;
+				node_color[i] = colors("green");
+				node_size[i] = 8.0;
 			}
 			break;
+
 			case node_location::hole:
 			{
-				Ndata[i + 3] = 2.0;
+				node_color[i] = colors("green");
+				node_size[i] = 4.0;
 			}
 			break;
+
 			case node_location::inside:
 			{
-				Ndata[i + 3] = 3.0;
+				node_color[i] = colors("yellow");
+				node_size[i] = 3.0;
 			}
 			break;
+
 			case node_location::outside:
 			{
-				Ndata[i + 3] = 4.0;
+				node_color[i] = colors("purple");
+				node_size[i] = 2.0;
 			}
 			break;
-			default:
-				break;
 			}
 		}
 
-		GLuint bufmesh, bufnode;
-		unsigned int vao[3], test;
+		for (size_t i = 0; i < 6 * number_of_triangles(); i += 6)
+		{
+			k = i / 6;
+			triangle_index[i + 0] = GLuint(T[k].a);
+			triangle_index[i + 1] = GLuint(T[k].b);
 
-		glGenVertexArrays(3, vao);
+			triangle_index[i + 2] = GLuint(T[k].b);
+			triangle_index[i + 3] = GLuint(T[k].c);
 
-		glBindVertexArray(vao[0]);
-		glGenBuffers(1, &bufmesh);
-		glBindBuffer(GL_ARRAY_BUFFER, bufmesh);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 18 * number_of_triangles(), Tdata, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+			triangle_index[i + 4] = GLuint(T[k].c);
+			triangle_index[i + 5] = GLuint(T[k].a);
 
-		glBindVertexArray(vao[1]);
-		glGenBuffers(1, &bufnode);
-		glBindBuffer(GL_ARRAY_BUFFER, bufnode);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * number_of_nodes(), Ndata, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-		glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(3 * sizeof(float)));
+			if (T[k].type == triangle_type::domain)
+			{
+				triangle_edge_color[i + 0] = colors("red");
+				triangle_edge_color[i + 1] = colors("red");
+				triangle_edge_color[i + 2] = colors("red");
+				triangle_edge_color[i + 3] = colors("red");
+				triangle_edge_color[i + 4] = colors("red");
+				triangle_edge_color[i + 5] = colors("red");
+			}
 
-		glBindVertexArray(0);
+			else
+			{
+				triangle_edge_color[i + 0] = colors("turquoise");
+				triangle_edge_color[i + 1] = colors("turquoise");
+				triangle_edge_color[i + 2] = colors("turquoise");
+				triangle_edge_color[i + 3] = colors("turquoise");
+				triangle_edge_color[i + 4] = colors("turquoise");
+				triangle_edge_color[i + 5] = colors("turquoise");
+			}
+		}
+
+		data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
+		vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
+
+		data_buffer cb_node(GL_ARRAY_BUFFER, node_color);
+		cb_node.configure_layout(2, 3, 3, GL_FLOAT);
+
+		data_buffer cb_triangle_edge(GL_ARRAY_BUFFER, triangle_edge_color);
+		cb_triangle_edge.configure_layout(2, 3, 3, GL_FLOAT);
+
+		data_buffer db_node_size(GL_ARRAY_BUFFER, node_size);
+		db_node_size.configure_layout(3, 1, 1, GL_FLOAT);
+
+		data_buffer ib_node(GL_ELEMENT_ARRAY_BUFFER, node_index), ib_triangle_edge(GL_ELEMENT_ARRAY_BUFFER, triangle_index);
+
+		vertex_array va_node(GL_POINTS), va_triangle_edge(GL_LINES);
+
+		va_node.bind();
+		va_node.bind_buffer({&vb_pos, &cb_node, &db_node_size, &ib_node});
+		va_node.unbind();
+
+		va_triangle_edge.bind();
+		va_triangle_edge.bind_buffer({&vb_pos, &cb_triangle_edge, &ib_triangle_edge});
+		va_triangle_edge.unbind();
 
 		shadersource src = parseshader("src/shaders/inspect_display.glsl");
 		unsigned int shader = createshader(src.vertex, src.fragment);
@@ -705,34 +659,27 @@ void mesh::inspect()
 		glEnable(GL_PROGRAM_POINT_SIZE);
 
 		glm::mat4 trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
-		int loc_trans = glGetUniformLocation(shader, "translate");
-		glUniformMatrix4fv(loc_trans, 1, GL_FALSE, &trans[0][0]);
-
 		glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-		int loc_sc = glGetUniformLocation(shader, "scale");
-		glUniformMatrix4fv(loc_sc, 1, GL_FALSE, &scale[0][0]);
+		glm::mat4 mvp = trans * scale;
 
-		float psize = zoom;
-		int loc_psize = glGetUniformLocation(shader, "psize");
-		glUniform1f(loc_psize, psize);
+		uniform MVP(shader, "MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
+		uniform psize(shader, "psize", uniform_types::FLOAT, (void *)&zoom);
 
 		while (!return_to_console)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindVertexArray(vao[1]);
-			glDrawArrays(GL_POINTS, 0, sizeof(float) * 4 * number_of_nodes() / (sizeof(float) * 4));
+			va_node.bind();
+			va_node.draw();
 
-			glBindVertexArray(vao[0]);
-			glDrawArrays(GL_LINES, 0, sizeof(float) * 18 * number_of_triangles() / (sizeof(float) * 3));
+			va_triangle_edge.bind();
+			va_triangle_edge.draw();
 
 			trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
-			glUniformMatrix4fv(loc_trans, 1, GL_FALSE, &trans[0][0]);
-
 			scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-			glUniformMatrix4fv(loc_sc, 1, GL_FALSE, &scale[0][0]);
+			mvp = trans * scale;
 
-			psize = zoom;
-			glUniform1f(loc_psize, psize);
+			MVP.update();
+			psize.update();
 
 			glBindVertexArray(0);
 
@@ -741,17 +688,7 @@ void mesh::inspect()
 		}
 
 		glDeleteProgram(shader);
-		delete[] Tdata;
-		delete[] Ndata;
 	}
-
-	/*p = { 0,0,0 };
-	dx = 0.1;
-	dy = 0.1;
-	dz = 0.1;
-	zoom = 1.0;
-	zoom_change = 0.1;
-	return_to_console = false;*/
 }
 
 /*Creates a trinagle and updates the triangle_share()s of it's nodes
@@ -765,6 +702,9 @@ void mesh::make_triangle(const node_id a, const node_id b, const node_id c, tria
 	N[a].T.push_back(T.size() - 1);
 	N[b].T.push_back(T.size() - 1);
 	N[c].T.push_back(T.size() - 1);
+
+	//T[T.size()-1].type = tp;
+	//printf("%s\n",(T[T.size()-1].type==triangle_type::domain)?"domain":"ghost");
 }
 
 void mesh::make_inside_edge(const node_id start, const node_id end, bool availability)
@@ -779,10 +719,10 @@ void mesh::make_inside_edge(const node_id start, const node_id end, bool availab
 double mesh::avg_area_of_triangles()
 {
 	double res = 0;
-	for (const mesh_triangle & m_t: T)
+	for (const mesh_triangle &m_t : T)
 		res += triangle_area(m_t);
-	
-	return res / number_of_triangles() ;
+
+	return res / number_of_triangles();
 }
 
 //updated on 23/8/18
@@ -790,7 +730,7 @@ double mesh::avg_area_of_triangles_near_boundary(node_location loc)
 {
 	double res = 0;
 	uint64_t count = 0;
-	for (const mesh_triangle & m_t: T)
+	for (const mesh_triangle &m_t : T)
 		if (N[m_t.a].location == loc || N[m_t.b].location == loc || N[m_t.c].location == loc)
 		{
 			res += triangle_area(m_t);
@@ -830,7 +770,7 @@ void mesh::node_edge_share_sweep()
 
 void mesh::edge_triangle_share_sweep()
 {
-	for(edge &m_e : E)
+	for (edge &m_e : E)
 		m_e.T.clear();
 
 	for (edge &m_e : E)
@@ -858,7 +798,7 @@ void mesh::edge_triangle_share_sweep()
 
 void mesh::triangle_edge_share_sweep()
 {
-	for(mesh_triangle &m_t : T)
+	for (mesh_triangle &m_t : T)
 		m_t.E.clear();
 
 	for (const edge &m_e : E)

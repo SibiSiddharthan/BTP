@@ -90,12 +90,6 @@ void input(_2D_ &boundary, mesh &M)
 		}
 		break;
 
-		case 11:
-		{
-			M.imp_display();
-		}
-		break;
-
 		case 100:
 		{
 			glfwPostEmptyEvent();
@@ -148,9 +142,7 @@ int main()
 		boundary.display();
 		import_2d(M, boundary);
 		M.attach_window(window);
-		//cin.get();
-		//M.imp_display();
-
+		
 		cout << "0:stats\n1:generate triangles\n2:node insertion\n3:equalize triangles\n4:edge swap\n"
 			 << "5:equalize triangles near boundary\n6:equalize triangles near hole\n7:node shift\n8:auto generate\n9:generate ghost triangles\n10:display\n100:inspect\n999:quit\n";
 		while (!quit)
@@ -164,7 +156,6 @@ int main()
 	else
 	{
 		cout << "Errors in the Drawing\n";
-
 		cin.get();
 	}
 
@@ -172,5 +163,5 @@ int main()
 
 	cin.get();
 
-	return 1;
+	return 0;
 }

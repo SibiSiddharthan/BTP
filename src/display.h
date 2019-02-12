@@ -1,9 +1,6 @@
 #pragma once
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include "geometry.h"
+
+#include "gl_abstraction.h"
 
 extern bool return_to_console;
 extern bool cursor_inside;
@@ -13,8 +10,8 @@ extern pos p;
 extern double dx;
 extern double dy;
 extern double dz;
-extern double zoom;
-extern double zoom_change;
+extern float zoom;
+extern float zoom_change;
 
 struct shadersource
 {

@@ -193,3 +193,5 @@ int create_window(GLFWwindow *&window, int width, int height)
 
 	return 1;
 }
+
+
