@@ -403,7 +403,7 @@ void mesh::display()
 		vector<GLuint> node_index(number_of_nodes());
 		vector<GLuint> triangle_index(6 * number_of_triangles());
 		vector<color> node_color(number_of_nodes());
-		vector<color> triangle_edge_color(6 * number_of_edges());
+		vector<color> triangle_edge_color(number_of_nodes());
 		vector<float> node_size(number_of_nodes());
 
 		uint64_t k = 0;
@@ -465,22 +465,16 @@ void mesh::display()
 
 			if (T[k].type == triangle_type::domain)
 			{
-				triangle_edge_color[i + 0] = colors("red");
-				triangle_edge_color[i + 1] = colors("red");
-				triangle_edge_color[i + 2] = colors("red");
-				triangle_edge_color[i + 3] = colors("red");
-				triangle_edge_color[i + 4] = colors("red");
-				triangle_edge_color[i + 5] = colors("red");
+				triangle_edge_color[T[k].a] = colors("red");
+				triangle_edge_color[T[k].b] = colors("red");
+				triangle_edge_color[T[k].c] = colors("red");
 			}
 
 			else
 			{
-				triangle_edge_color[i + 0] = colors("turquoise");
-				triangle_edge_color[i + 1] = colors("turquoise");
-				triangle_edge_color[i + 2] = colors("turquoise");
-				triangle_edge_color[i + 3] = colors("turquoise");
-				triangle_edge_color[i + 4] = colors("turquoise");
-				triangle_edge_color[i + 5] = colors("turquoise");
+				triangle_edge_color[T[k].a] = colors("turquoise");
+				triangle_edge_color[T[k].b] = colors("turquoise");
+				triangle_edge_color[T[k].c] = colors("turquoise");
 			}
 		}
 
@@ -547,7 +541,7 @@ void mesh::inspect()
 		vector<GLuint> node_index(number_of_nodes());
 		vector<GLuint> triangle_index(6 * number_of_triangles());
 		vector<color> node_color(number_of_nodes());
-		vector<color> triangle_edge_color(6 * number_of_edges());
+		vector<color> triangle_edge_color(number_of_nodes());
 		vector<float> node_size(number_of_nodes());
 
 		uint64_t k = 0;
@@ -609,22 +603,16 @@ void mesh::inspect()
 
 			if (T[k].type == triangle_type::domain)
 			{
-				triangle_edge_color[i + 0] = colors("red");
-				triangle_edge_color[i + 1] = colors("red");
-				triangle_edge_color[i + 2] = colors("red");
-				triangle_edge_color[i + 3] = colors("red");
-				triangle_edge_color[i + 4] = colors("red");
-				triangle_edge_color[i + 5] = colors("red");
+				triangle_edge_color[T[k].a] = colors("red");
+				triangle_edge_color[T[k].b] = colors("red");
+				triangle_edge_color[T[k].c] = colors("red");
 			}
 
 			else
 			{
-				triangle_edge_color[i + 0] = colors("turquoise");
-				triangle_edge_color[i + 1] = colors("turquoise");
-				triangle_edge_color[i + 2] = colors("turquoise");
-				triangle_edge_color[i + 3] = colors("turquoise");
-				triangle_edge_color[i + 4] = colors("turquoise");
-				triangle_edge_color[i + 5] = colors("turquoise");
+				triangle_edge_color[T[k].a] = colors("turquoise");
+				triangle_edge_color[T[k].b] = colors("turquoise");
+				triangle_edge_color[T[k].c] = colors("turquoise");
 			}
 		}
 
@@ -680,8 +668,6 @@ void mesh::inspect()
 
 			MVP.update();
 			psize.update();
-
-			glBindVertexArray(0);
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();

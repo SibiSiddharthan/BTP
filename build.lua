@@ -32,6 +32,7 @@ project "Mesh"
 		filter{"configurations:Debug"}
 			targetname("mesh_debug")
 			symbols("On")
+			defines{"_GLIBCXX_DEBUG"}
 		filter{"configurations:Release"}
 			targetname("mesh")
 			symbols("Off")

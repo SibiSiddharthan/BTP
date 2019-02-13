@@ -17,7 +17,7 @@ ifeq ($(config),debug)
   OBJDIR = obj/make/Debug
   PCH = src/preprocess.h
   GCH = $(OBJDIR)/$(notdir $(PCH)).gch
-  DEFINES +=
+  DEFINES += -D_GLIBCXX_DEBUG
   INCLUDES +=
   FORCE_INCLUDE += -include $(OBJDIR)/$(notdir $(PCH))
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
