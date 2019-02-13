@@ -1,6 +1,5 @@
 #include "geometry.h"
 
-
 //useful funtions
 
 const double area_of_triangle(const pos a,const pos b,const pos c)
@@ -157,56 +156,11 @@ and checks whether the point is on the left or right side of the line
 
 bool left_test_2d(line l, pos p)
 {
-	p -= l.start;
-	pos temp = l.end - l.start;
-	if (fabs(l.end.x - l.start.x) > epsilon) // Not 90 degree
-	{
-		double m = (l.end.y - l.start.y) / ((l.end.x - l.start.x));
-		double angle = atan(m);
-
-		if (angle >= 0)
-		{
-			if (temp.x >= 0) //1st quadrant
-				p.x = p.x * cos(pi * 0.5 - angle) - p.y * sin(pi * 0.5 - angle);
-			else // 3rd quadrant
-				p.x = p.x * cos(pi * 0.5 + angle) + p.y * sin(pi * 0.5 + angle);
-		}
-		else
-		{
-			angle = fabs(angle);
-			if (temp.x >= 0) //4th quadrant
-				p.x = p.x * cos(pi * 0.5 + angle) - p.y * sin(pi * 0.5 + angle);
-			else //2nd quadrant
-				p.x = p.x * cos(pi * 0.5 - angle) + p.y * sin(pi * 0.5 - angle);
-		}
-
-		if (p.x < 0)
-			return true;
-		else
-			return false;
-	}
-
+	pos p1 = l.end - l.start, p2 = p - l.start;
+	if(p1.x * p2.y - p2.x * p1.y > 0)
+		return true;
 	else
-	{
-		if (temp.y > 0)
-		{
-			if (p.x < 0)
-				return true;
-			else
-				return false;
-		}
-
-		else if (temp.y < 0)
-		{
-			if (p.x > 0)
-				return true;
-			else
-				return false;
-		}
-
-		else
-			return true;
-	}
+		return false;
 }
 
 //If the absolute value of the square of the area of the triangle is less than epsilon then the function returns true
