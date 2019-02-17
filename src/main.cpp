@@ -94,12 +94,17 @@ void input(_2D_ &boundary, mesh &M)
 		{
 			glfwPostEmptyEvent();
 			cout << "Entering inspect mode\n";
-			M.inspect();
+			M.display(true);
 			cout << "Returning to console\n";
 			M.display();
 			glfwWaitEventsTimeout(100.0);
 		}
 		break;
+
+		case 11:
+		{
+			M.generate_mesh_basic(true);
+		}break;
 
 		case 999:
 		{

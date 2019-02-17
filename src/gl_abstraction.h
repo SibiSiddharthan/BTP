@@ -196,6 +196,7 @@ class vertex_array
 
 	inline void draw()
 	{
+		bind();
 		if (index_buffer != nullptr)
 			glDrawElements(mode, index_buffer->get_size(), GL_UNSIGNED_INT, nullptr);
 	}

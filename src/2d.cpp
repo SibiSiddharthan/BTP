@@ -172,7 +172,7 @@ void _2D_::display()
 	va_edge.bind_buffer({&vb_pos, &cb_edge, &ib_edge});
 	va_edge.unbind();
 
-	shadersource src = parseshader("src/shaders/basic_display.glsl");
+	shadersource src = parseshader("src/shaders/debug_display.glsl");
 	unsigned int shader = createshader(src.vertex, src.fragment);
 	glUseProgram(shader);
 

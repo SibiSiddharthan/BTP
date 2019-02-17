@@ -109,6 +109,18 @@ class mesh
 	void node_edge_share_sweep();
 	void edge_triangle_share_sweep();
 	void triangle_edge_share_sweep();
+	void display_node(const std::vector<node> &m_N);
+	void display_triangle(const std::vector<mesh_triangle> &m_T);
+	void display_edge(const std::vector<edge> &m_E);
+	void display_all_nodes();
+	void display_all_edges();
+	void display_all_triangles();
+	inline void window_swap_buffers()
+	{
+		glfwSwapBuffers(window);
+	}
+	std::vector<float> pdata;
+	void update_pdata();
 
   public:
 	void init_2d();
@@ -123,7 +135,7 @@ class mesh
 		Details: Take a edge , take a node checks whether
 		the triangle formed is valid i.e triangle lies within the domain,
 		and triangle has a non zero area*/
-	void generate_mesh_basic();
+	void generate_mesh_basic(bool debug = false);
 
 	/*Inserts a node into the domain
 		at the centroid of the polygon formed by
@@ -159,11 +171,7 @@ class mesh
 	}
 
 	//Displays the mesh onto the screen
-	void display();
-	void imp_display();
-
-	//Helps to inspect the mesh closely for any defects
-	void inspect();
+	void display(bool inspect = false, bool swap_buffer = false);
 
 	//Displays the number of nodes, triangle
 	//and the average area of the triangles in the mesh
