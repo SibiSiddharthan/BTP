@@ -75,7 +75,9 @@ OBJECTS := \
 	$(OBJDIR)/geometry.o \
 	$(OBJDIR)/linear_algebra.o \
 	$(OBJDIR)/main.o \
-	$(OBJDIR)/mesh.o \
+	$(OBJDIR)/mesh_display.o \
+	$(OBJDIR)/mesh_private.o \
+	$(OBJDIR)/mesh_public.o \
 
 RESOURCES := \
 
@@ -152,7 +154,13 @@ $(OBJDIR)/linear_algebra.o: src/linear_algebra.cpp
 $(OBJDIR)/main.o: src/main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/mesh.o: src/mesh.cpp
+$(OBJDIR)/mesh_display.o: src/mesh_display.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mesh_private.o: src/mesh_private.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/mesh_public.o: src/mesh_public.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
