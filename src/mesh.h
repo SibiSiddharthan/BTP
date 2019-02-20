@@ -140,22 +140,22 @@ class mesh
 	/*Inserts a node into the domain
 		at the centroid of the polygon formed by
 		the triangles that share a common boundary node*/
-	void node_insertion();
+	void node_insertion(bool debug = false);
 
 	/*Forms 3 triangles by joining each of the triangle's edge with the 
 		centroid of the triangle*/
-	void refine_triangles();
+	void refine_triangles(bool debug = false);
 	void refine_triangles_near_boundary(node_location);
 
 	/*Swaps the edge of 2 adjacent triangles
 		if the minimum angle increasese after swapping*/
-	void edge_swap();
+	void edge_swap(bool debug = false);
 
 	/*Considers an inside node and changes it's
 		position to the centroid of the polygon formed
 		by all the triangles that share a common node inside the
 		domain*/
-	void centroid_shift();
+	void centroid_shift(bool debug = false);
 
 	/*Generates a complete mesh
 		Details: First generates basic mesh next does node insertion,
@@ -171,7 +171,7 @@ class mesh
 	}
 
 	//Displays the mesh onto the screen
-	void display(bool inspect = false, bool swap_buffer = false);
+	void display(bool inspect = false);
 
 	//Displays the number of nodes, triangle
 	//and the average area of the triangles in the mesh

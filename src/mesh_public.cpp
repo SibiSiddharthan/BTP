@@ -74,11 +74,7 @@ void mesh::generate_mesh_basic(bool debug)
 			{
 				glfwPostEmptyEvent();
 				cin.get();
-				cin.get();
 				update_pdata();
-				//glm::mat4 trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
-				//glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-				//glm::mat4 mvp = trans * scale;
 
 				shadersource src = parseshader("src/shaders/debug_display.glsl");
 				unsigned int shader = createshader(src.vertex, src.fragment);
@@ -86,25 +82,20 @@ void mesh::generate_mesh_basic(bool debug)
 
 				glEnable(GL_PROGRAM_POINT_SIZE);
 				glEnable(GL_LINE_SMOOTH);
-				//uniform MVP(shader, "MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
-				//uniform psize(shader, "psize", uniform_types::FLOAT, (void *)&zoom);
 				glClear(GL_COLOR_BUFFER_BIT);
 				display_all_nodes();
 				display_all_edges();
 				display_node({N[k], N[E[i].start], N[E[i].end]});
 				glLineWidth(3.0);
 				display_edge({E[i]});
+				glLineWidth(1.0);
 				window_swap_buffers();
-				//trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
-				//scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-				//mvp = trans * scale;
-				//MVP.update();
-				//psize.update();
-
+				glDeleteProgram(shader);
 				glfwWaitEventsTimeout(100.0);
 				cout << "Enter for next\n";
 				cin.get();
 			}
+
 			if (E[i].availability && k > -1)
 			{
 
@@ -137,12 +128,38 @@ void mesh::generate_mesh_basic(bool debug)
 				make_triangle(E[i].start, E[i].end, N[k].id);
 				E[i].availability = false;
 			}
+
+			if (debug && k > -1)
+			{
+				glfwPostEmptyEvent();
+				cin.get();
+				update_pdata();
+
+				shadersource src = parseshader("src/shaders/debug_display.glsl");
+				unsigned int shader = createshader(src.vertex, src.fragment);
+				glUseProgram(shader);
+
+				glEnable(GL_PROGRAM_POINT_SIZE);
+				glEnable(GL_LINE_SMOOTH);
+				glClear(GL_COLOR_BUFFER_BIT);
+				display_all_nodes();
+				display_all_edges();
+				display_node({N[k], N[E[i].start], N[E[i].end]});
+				glLineWidth(3.0);
+				display_triangle({T[T.size() - 1]});
+				glLineWidth(1.0);
+				window_swap_buffers();
+				glDeleteProgram(shader);
+				glfwWaitEventsTimeout(100.0);
+				cout << "Enter for next\n";
+				cin.get();
+			}
 		}
 	}
 }
 
 //updated on 23/8/18
-void mesh::node_insertion()
+void mesh::node_insertion(bool debug)
 {
 	for (size_t i = 0; i < number_of_nodes(); i++)
 	{
@@ -169,6 +186,36 @@ void mesh::node_insertion()
 
 				if (distance((N[np.first].p + N[np.second].p) * 0.5, N[i].p) < distance((N[np.first].p + N[np.second].p) * 0.5, centroid))
 				{
+					if (debug)
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						temp.push_back(N[i]);
+						display_node(temp);
+						glLineWidth(3.0);
+						vector<mesh_triangle> T_temp;
+						for (const uint64_t &t_id : N[i].T)
+							T_temp.push_back(T[t_id]);
+						display_triangle(T_temp);
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
+
 					N.push_back({centroid, N.size(), node_location::inside, false});
 
 					for (size_t j = 0; j < N[i].triangle_share(); j++)
@@ -185,6 +232,36 @@ void mesh::node_insertion()
 					make_inside_edge(N[N.size() - 1].id, N[i].id, false);
 					make_inside_edge(N[N.size() - 1].id, N[np.first].id, false);
 					make_inside_edge(N[N.size() - 1].id, N[np.second].id, false);
+
+					if (debug)
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						temp.push_back(N[i]);
+						display_node(temp);
+						glLineWidth(3.0);
+						vector<mesh_triangle> T_temp;
+						for (const uint64_t &t_id : N[N.size() - 1].T)
+							T_temp.push_back(T[t_id]);
+						display_triangle(T_temp);
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
 				}
 			}
 		}
@@ -192,7 +269,7 @@ void mesh::node_insertion()
 }
 
 //updated on 23/8/18
-void mesh::refine_triangles()
+void mesh::refine_triangles(bool debug)
 {
 	double avg = avg_area_of_triangles();
 
@@ -207,6 +284,30 @@ void mesh::refine_triangles()
 			{
 				if (double area = triangle_area(m_t); area > 2 * avg && area > 2.5 * area_threshold)
 				{
+					if (debug )
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						glLineWidth(3.0);
+						display_triangle({m_t});
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
 					N.push_back({(N[m_t.a].p + N[m_t.b].p + N[m_t.c].p) / 3.0, N.size(), node_location::inside, false});
 
 					temp.push_back({N[N.size() - 1].id, m_t.b, m_t.c, temp.size()});
@@ -216,6 +317,32 @@ void mesh::refine_triangles()
 					make_inside_edge(N[N.size() - 1].id, m_t.a, false);
 					make_inside_edge(N[N.size() - 1].id, m_t.b, false);
 					make_inside_edge(N[N.size() - 1].id, m_t.c, false);
+
+					if (debug )
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						glLineWidth(3.0);
+						display_triangle({temp[temp.size()-1],temp[temp.size()-2],temp[temp.size()-3]});
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
+					
 				}
 				else
 					temp.push_back({m_t.a, m_t.b, m_t.c, temp.size()});
@@ -245,6 +372,7 @@ void mesh::refine_triangles_near_boundary(node_location _location)
 			{
 				if (double area = triangle_area(m_t); area > 1.5 * avg && area > 2 * area_threshold)
 				{
+
 					N.push_back({(N[m_t.a].p + N[m_t.b].p + N[m_t.c].p) / 3.0, N.size(), node_location::inside, false});
 
 					temp.push_back({N[N.size() - 1].id, m_t.b, m_t.c, temp.size()});
@@ -268,7 +396,7 @@ void mesh::refine_triangles_near_boundary(node_location _location)
 }
 
 //updated on 23/8/18
-void mesh::edge_swap()
+void mesh::edge_swap(bool debug)
 {
 	uint64_t flag = 0;
 	edge_triangle_share_sweep();
@@ -301,6 +429,34 @@ void mesh::edge_swap()
 				if (min(min_old_1, min_old_2) < min(min_new_1, min_new_2) && (area_new_1 > epsilon && area_new_2 > epsilon) && //
 					fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2)) < epsilon)
 				{
+
+					if (debug)
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						glLineWidth(3.0);
+						vector<mesh_triangle> T_temp;
+						for (const uint64_t &t_id : m_e.T)
+							T_temp.push_back(T[t_id]);
+						display_triangle(T_temp);
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
 					edge_id edge_to_be_updated_0, edge_to_be_updated_1;
 					for (const edge_id e_id : T[m_e.T[0]].E)
 					{
@@ -348,6 +504,34 @@ void mesh::edge_swap()
 							e_id = edge_to_be_updated_0;
 
 					flag++;
+
+					if (debug)
+					{
+						glfwPostEmptyEvent();
+						cin.get();
+						update_pdata();
+
+						shadersource src = parseshader("src/shaders/debug_display.glsl");
+						unsigned int shader = createshader(src.vertex, src.fragment);
+						glUseProgram(shader);
+
+						glEnable(GL_PROGRAM_POINT_SIZE);
+						glEnable(GL_LINE_SMOOTH);
+						glClear(GL_COLOR_BUFFER_BIT);
+						display_all_nodes();
+						display_all_edges();
+						glLineWidth(3.0);
+						vector<mesh_triangle> T_temp;
+						for (const uint64_t &t_id : m_e.T)
+							T_temp.push_back(T[t_id]);
+						display_triangle(T_temp);
+						glLineWidth(1.0);
+						window_swap_buffers();
+						glDeleteProgram(shader);
+						glfwWaitEventsTimeout(100.0);
+						cout << "Enter for next\n";
+						cin.get();
+					}
 				}
 			}
 		}
@@ -358,7 +542,7 @@ void mesh::edge_swap()
 }
 
 //updated on 23/8/18
-void mesh::centroid_shift()
+void mesh::centroid_shift(bool debug)
 {
 	for (node &m_n : N)
 	{
@@ -377,7 +561,66 @@ void mesh::centroid_shift()
 			for (const node_id n_id : S)
 				temp.push_back(N[n_id]);
 
+			if (debug)
+			{
+				glfwPostEmptyEvent();
+				cin.get();
+				update_pdata();
+
+				shadersource src = parseshader("src/shaders/debug_display.glsl");
+				unsigned int shader = createshader(src.vertex, src.fragment);
+				glUseProgram(shader);
+
+				glEnable(GL_PROGRAM_POINT_SIZE);
+				glEnable(GL_LINE_SMOOTH);
+				glClear(GL_COLOR_BUFFER_BIT);
+				display_all_nodes();
+				display_all_edges();
+				temp.push_back(m_n);
+				display_node(temp);
+				glLineWidth(3.0);
+				vector<mesh_triangle> T_temp;
+				for (const uint64_t &t_id : m_n.T)
+					T_temp.push_back(T[t_id]);
+				display_triangle(T_temp);
+				glLineWidth(1.0);
+				window_swap_buffers();
+				glDeleteProgram(shader);
+				glfwWaitEventsTimeout(100.0);
+				cout << "Enter for next\n";
+				cin.get();
+			}
 			m_n.p = generate_centroid(temp);
+
+			if (debug)
+			{
+				glfwPostEmptyEvent();
+				cin.get();
+				update_pdata();
+
+				shadersource src = parseshader("src/shaders/debug_display.glsl");
+				unsigned int shader = createshader(src.vertex, src.fragment);
+				glUseProgram(shader);
+
+				glEnable(GL_PROGRAM_POINT_SIZE);
+				glEnable(GL_LINE_SMOOTH);
+				glClear(GL_COLOR_BUFFER_BIT);
+				display_all_nodes();
+				display_all_edges();
+				temp.push_back(m_n);
+				display_node(temp);
+				glLineWidth(3.0);
+				vector<mesh_triangle> T_temp;
+				for (const uint64_t &t_id : m_n.T)
+					T_temp.push_back(T[t_id]);
+				display_triangle(T_temp);
+				glLineWidth(1.0);
+				window_swap_buffers();
+				glDeleteProgram(shader);
+				glfwWaitEventsTimeout(100.0);
+				cout << "Enter for next\n";
+				cin.get();
+			}
 		}
 	}
 }
@@ -421,6 +664,3 @@ void mesh::generate_ghosts()
 	}
 	ghost_generated = true;
 }
-
-
-

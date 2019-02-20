@@ -18,7 +18,7 @@ float zoom;
 float zoom_change;
 
 //updated on 23/8/18
-void mesh::display(bool inspect, bool swap_buffer)
+void mesh::display(bool inspect)
 {
 	p = {0, 0, 0};
 	dx = 0.05;
@@ -56,7 +56,7 @@ void mesh::display(bool inspect, bool swap_buffer)
 			case node_location::boundary:
 			{
 				node_color[i] = colors("green");
-				node_size[i] = 8.0;
+				node_size[i] = 6.0;
 			}
 			break;
 
@@ -147,7 +147,7 @@ void mesh::display(bool inspect, bool swap_buffer)
 		uniform MVP(shader, "MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
 		uniform psize(shader, "psize", uniform_types::FLOAT, (void *)&zoom);
 
-		if (!inspect && !swap_buffer)
+		if (!inspect )
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
 			va_node.draw();
@@ -163,7 +163,7 @@ void mesh::display(bool inspect, bool swap_buffer)
 			glfwSwapBuffers(window);
 		}
 
-		else if (inspect && !swap_buffer)
+		else// if (inspect)
 		{
 			while (!return_to_console)
 			{
@@ -181,20 +181,6 @@ void mesh::display(bool inspect, bool swap_buffer)
 				glfwSwapBuffers(window);
 				glfwPollEvents();
 			}
-		}
-
-		else if (!inspect && swap_buffer)
-		{
-			glClear(GL_COLOR_BUFFER_BIT);
-			va_node.draw();
-			va_triangle_edge.draw();
-
-			trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
-			scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-			mvp = trans * scale;
-
-			MVP.update();
-			psize.update();
 		}
 
 		glDeleteProgram(shader);
@@ -227,7 +213,7 @@ void mesh::display_node(const vector<node> &m_N)
 	for (const node &n : N)
 	{
 		node_color.push_back(colors("yellow"));
-		node_size.push_back(12.0);
+		node_size.push_back(10.0);
 	}
 	data_buffer vb_pos(GL_ARRAY_BUFFER, pdata);
 	vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
@@ -251,26 +237,45 @@ void mesh::display_node(const vector<node> &m_N)
 
 void mesh::display_triangle(const vector<mesh_triangle> &m_T)
 {
+	vector<GLuint> triangle_index(6 * m_T.size());
+	
+	vector<color> edge_color;
+	uint64_t k;
+	for (size_t i = 0; i < 6 * m_T.size(); i += 6)
+	{
+		k = i / 6;
+		triangle_index[i + 0] = GLuint(m_T[k].a);
+		triangle_index[i + 1] = GLuint(m_T[k].b);
+
+		triangle_index[i + 2] = GLuint(m_T[k].b);
+		triangle_index[i + 3] = GLuint(m_T[k].c);
+
+		triangle_index[i + 4] = GLuint(m_T[k].c);
+		triangle_index[i + 5] = GLuint(m_T[k].a);
+	}
+	for (const node &n : N)
+		edge_color.push_back(colors("yellow"));
+	data_buffer vb_pos(GL_ARRAY_BUFFER, pdata);
+	vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
+
+	data_buffer cb_triangle_edge(GL_ARRAY_BUFFER, edge_color);
+	cb_triangle_edge.configure_layout(2, 3, 3, GL_FLOAT);
+
+	data_buffer ib_triangle_edge(GL_ELEMENT_ARRAY_BUFFER, triangle_index);
+
+	vertex_array va_triangle_edge(GL_LINES);
+
+	va_triangle_edge.bind();
+	va_triangle_edge.bind_buffer({&vb_pos, &cb_triangle_edge, &ib_triangle_edge});
+	va_triangle_edge.unbind();
+
+	va_triangle_edge.draw();
 }
 
 void mesh::display_edge(const vector<edge> &m_E)
 {
 	vector<GLuint> edge_index(2 * m_E.size());
-	/*unordered_set<uint64_t> unique_nodes;
-	for(const edge& e:m_E)
-	{
-		unique_nodes.insert(e.start);
-		unique_nodes.insert(e.end);
-	}
-	uint64_t n = unique_nodes.size();
-	vector<float> posdata;
-	for(const uint64_t value:unique_nodes)
-	{
-		posdata.push_back((float)N[value].p.x);
-		posdata.push_back((float)N[value].p.y);
-		posdata.push_back((float)N[value].p.z);
-	}*/
-
+	
 	vector<color> edge_color;
 	uint64_t k;
 	for (size_t i = 0; i < 2 * m_E.size(); i += 2)
@@ -324,7 +329,7 @@ void mesh::display_all_nodes()
 			case node_location::boundary:
 			{
 				node_color[i] = colors("green");
-				node_size[i] = 8.0;
+				node_size[i] = 6.0;
 			}
 			break;
 			case node_location::hole:

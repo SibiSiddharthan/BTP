@@ -104,7 +104,35 @@ void input(_2D_ &boundary, mesh &M)
 		case 11:
 		{
 			M.generate_mesh_basic(true);
+			M.display();
 		}break;
+
+		case 12:
+		{
+			M.node_insertion(true);
+			M.display();
+		}
+		break;
+
+		case 13:
+		{
+			M.refine_triangles(true);
+			M.display();
+		}
+		break;
+
+		case 14:
+		{
+			M.edge_swap(true);
+			M.display();
+		}
+		break;
+
+		case 15:
+		{
+			M.centroid_shift(true);
+			M.display();
+		}
 
 		case 999:
 		{
@@ -131,7 +159,7 @@ int main()
 	_2D_ boundary;
 	mesh M;
 	boundary.attach_window(window);
-	boundary.add_boundary_circle(0.6, 0.1);
+	boundary.add_boundary_circle(0.6, 0.3);
 	//boundary.add_hole_square({ 0,0,0 }, 0.4, 0.05);
 	//boundary.add_boundary_square( 0.8, 0.05);
 	/*boundary.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
