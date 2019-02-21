@@ -70,6 +70,7 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/2d.o \
+	$(OBJDIR)/3d.o \
 	$(OBJDIR)/display.o \
 	$(OBJDIR)/dxfreader.o \
 	$(OBJDIR)/geometry.o \
@@ -78,6 +79,7 @@ OBJECTS := \
 	$(OBJDIR)/mesh_display.o \
 	$(OBJDIR)/mesh_private.o \
 	$(OBJDIR)/mesh_public.o \
+	$(OBJDIR)/stl_reader.o \
 
 RESOURCES := \
 
@@ -139,6 +141,9 @@ endif
 $(OBJDIR)/2d.o: src/2d.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/3d.o: src/3d.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/display.o: src/display.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -161,6 +166,9 @@ $(OBJDIR)/mesh_private.o: src/mesh_private.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/mesh_public.o: src/mesh_public.cpp
+	@echo $(notdir $<)
+	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/stl_reader.o: src/stl_reader.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

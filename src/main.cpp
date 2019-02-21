@@ -1,4 +1,6 @@
 #include "mesh.h"
+#include "stl_reader.h"
+#include "3d.h"
 
 using namespace std;
 
@@ -152,10 +154,17 @@ void input(_2D_ &boundary, mesh &M)
 
 int main()
 {
-
 	GLFWwindow *window = nullptr;
 	create_window(window, 800, 800);
 
+	_3D_ surf;
+	surf.attach_window(window);
+	surf.stl_read("tests/sphere1.stl");
+	surf.display();
+
+	cin.get();cin.get();
+
+	
 	_2D_ boundary;
 	mesh M;
 	boundary.attach_window(window);

@@ -19,6 +19,15 @@ struct triangle
 	}
 };
 
+struct plane
+{
+	pos a,b,c,normal;
+	plane(pos _a = {},pos _b = {}, pos _c = {}, pos _normal = {0,0,1}): a{_a}, b{_b}, c{_c}, normal{_normal}
+	{
+
+	}
+};
+
 //useful function
 inline const double distance(const pos a, const pos b)
 {
