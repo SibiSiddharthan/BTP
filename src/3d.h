@@ -6,8 +6,7 @@ class _3D_
 {
 	private:
 	std::vector<node> N;
-	//std
-	std::vector<plane> P;
+	std::vector<mesh_plane> P;
 	GLFWwindow *window = nullptr;
 
 	public:
@@ -20,5 +19,13 @@ class _3D_
 
 	void stl_read(const std::string filepath);
 
+	inline const uint64_t number_of_nodes()
+	{
+		return N.size();
+	}
 
+	inline const uint64_t number_of_planes()
+	{
+		return P.size();
+	}
 };

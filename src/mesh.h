@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "2d.h"
+#include "3d.h"
 
 enum class mesh_type
 {
@@ -16,6 +17,7 @@ class mesh
 	std::vector<node> N;
 	std::vector<edge> E;
 	std::vector<mesh_triangle> T;
+	std::vector<mesh_plane> P;
 	std::vector<tetrahedron> TH;
 	GLFWwindow *window = nullptr;
 	mesh_type type;
@@ -23,11 +25,15 @@ class mesh
 	bool ghost_generated = false;
 	bool basic_generation = false;
 
-	/*Creates a new triangle appends it the array and
+	/*Creates a new triangle appends it to the vector and
 		links it with its nodes	*/
 	void make_triangle(const node_id , const node_id , const node_id , triangle_type = triangle_type::domain);
 
 	void make_inside_edge(const node_id, const node_id,bool);
+
+	void make_inside_plane(const node_id, const node_id, const node_id,bool);
+
+	void make_tetrahedron(const node_id , const node_id , const node_id ,const node_id, tetrahedron_type = tetrahedron_type::domain);
 
 	inline const uint64_t number_of_nodes()
 	{
@@ -44,6 +50,11 @@ class mesh
 		return T.size();
 	}
 
+	inline const uint64_t number_of_planes()
+	{
+		return P.size();
+	}
+
 	//updated on 23/8/18
 	//This function is only used by generate_mesh_basic
 	inline bool left_test(const edge& e, const node& n)
@@ -51,11 +62,21 @@ class mesh
 		return left_test_2d({ N[e.start].p, N[e.end].p}, n.p);
 	}
 
+	inline bool left_test(const mesh_plane& p, const node& n)
+	{
+		return left_test_3d({N[p.a].p,N[p.b].p,N[p.c].p,p.normal},n.p);
+	}
+
 	//updated on 23/8/18
 	//This function is only used by generate_mesh_basic
 	inline bool collinear_test(const edge& e, const node& n)
 	{
-		return !is_collinear({N[e.start].p, N[e.end].p},n.p);
+		return !is_collinear(line(N[e.start].p, N[e.end].p),n.p);
+	}
+
+	inline bool collinear_test(const mesh_plane& p,const node &n)
+	{
+		return !is_collinear({N[p.a].p,N[p.b].p,N[p.c].p,p.normal},n.p);
 	}
 
 	//updated on 23/8/18
@@ -87,7 +108,13 @@ class mesh
 		return area_of_triangle(N[m.a].p,N[m.b].p,N[m.c].p);
 	}
 
+	inline const double tetrahedron_volume(const tetrahedron& te)
+	{
+		return volume_of_tetrahedron(N[te.a].p,N[te.b].p,N[te.c].p,N[te.d].p);
+	}
+
 	int64_t edge_exists(const std::vector<edge>& ,const edge& );
+	int64_t plane_exists(const std::vector<mesh_plane>& ,const mesh_plane& );
 	void disable_common_node(const edge& ,const edge& );
 
 	std::pair<node_id, node_id> corner_pos(const node &);
@@ -121,6 +148,11 @@ class mesh
 	}
 	std::vector<float> pdata;
 	void update_pdata();
+
+	void node_tetrahedron_share_sweep();
+	void node_plane_share_sweep();
+	void plane_tetrahedron_share_sweep();
+	void tetrahedron_plane_share_sweep();
 
   public:
 	void init_2d();
@@ -183,7 +215,16 @@ class mesh
 	//Returns the average area of the triangles which are near a boundary or a hole in the mesh
 	double avg_area_of_triangles_near_boundary(node_location);
 
-	
+	double avg_volume_of_tetrahedrons();
+	double avg_volume_of_tetrahedrons_near_boundary(node_location);
+
+	void refine_tetrahedrons();
+	void refine_tetrahedrons_near_boundary(node_location);
+	void centroid_shift_3d();
+	void node_insertion_3d();
+	void generate_basic_mesh_3d();
+	void plane_swap();
+	void generate_mesh_basic_3d();
 };
 
 
@@ -199,6 +240,17 @@ inline uint64_t number_of_unused_edges(const std::vector<edge>& E)
 	for (const edge& e :E)
 	{
 		if (e.availability == true)
+			count++;
+	}
+	return count;
+}
+
+inline uint64_t number_of_unused_planes(const std::vector<mesh_plane>&P)
+{
+	uint64_t count = 0;
+	for (const mesh_plane& p :P)
+	{
+		if (p.availability == true)
 			count++;
 	}
 	return count;

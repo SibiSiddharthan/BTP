@@ -40,24 +40,26 @@ inline const double length_of_line(const line l)
 }
 
 const double area_of_triangle(const pos a,const pos b,const pos c);
+const double volume_of_tetrahedron(const pos a,const pos b,const pos c,const pos d);
 pos rotate_point(pos, double);			//counter-clockwise
 const double line_inclination_absolute(line); //0 to 2pi
 
 //Crucial Function for checking intersections
 const int side_of_point(line, pos);
 bool same_line(line, line);
-bool unique_pos(pos, pos *, const int);
-bool unique_pos(pos, std::vector<pos> &);
+
 
 //Finds the point of intersection of two lines if they intersect
 //Code not written yet
 pos intersection_point(line, line);
 
 //Checks whether a point lies on the left side of the line
-bool left_test_2d(line, pos);
+bool left_test_2d(const line &l, const pos &p);
+bool left_test_3d(const plane &p,const pos &a);
 
 //Checks whether a point and a line are collinear
-bool is_collinear(line, pos);
+bool is_collinear(const line &l,const pos &p);
+bool is_collinear(const plane &p,const pos &a);
 
 //Checks whether two lines intersec or not
 bool do_they_intersect(line, line);

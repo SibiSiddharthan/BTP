@@ -2,7 +2,7 @@
 
 //useful funtions
 
-const double area_of_triangle(const pos a,const pos b,const pos c)
+const double area_of_triangle(const pos a, const pos b, const pos c)
 {
 	double l1, l2, l3, s;
 	l1 = distance(a, b);
@@ -10,6 +10,11 @@ const double area_of_triangle(const pos a,const pos b,const pos c)
 	l3 = distance(b, c);
 	s = (l1 + l2 + l3) * 0.5;
 	return sqrt(s * (s - l1) * (s - l2) * (s - l3));
+}
+
+const double volume_of_tetrahedron(const pos a,const pos b,const pos c,const pos d)
+{
+	return fabs(1 / 6 * (dot(cross(a - d, b - d), c - d)));
 }
 
 pos rotate_point(pos p, double angle)
@@ -81,42 +86,6 @@ bool same_line(line l1, line l2)
 		return false;
 }
 
-bool unique_pos(pos p, pos *P, const int n)
-{
-	int flag = 0;
-	for (int i = 0; i < n; i++)
-	{
-		if (p == P[i])
-		{
-			flag++;
-			break;
-		}
-	}
-
-	if (flag == 0)
-		return true;
-	else
-		return false;
-}
-
-bool unique_pos(pos p, std::vector<pos> &plist)
-{
-	int flag = 0;
-	for (int i = 0; i < plist.size(); i++)
-	{
-		if (p == plist[i])
-		{
-			flag++;
-			break;
-		}
-	}
-
-	if (flag == 0)
-		return true;
-	else
-		return false;
-}
-
 bool do_they_intersect(line a, line b)
 {
 	if ((a.start != b.start && a.start != b.end && a.end != b.start && a.end != b.end))
@@ -124,9 +93,9 @@ bool do_they_intersect(line a, line b)
 		if (!(side_of_point(a, b.start) == 0 && side_of_point(a, b.end) == 0 && //concurrent line segments
 			  side_of_point(b, a.start) == 0 && side_of_point(b, a.end) == 0))
 		{
-			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) ||//
-			 (((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) || //
-			 (((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
+			if ((((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && ((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0)) || //
+				(((side_of_point(a, b.start) + side_of_point(a, b.end)) == 0) && (side_of_point(b, a.start) * side_of_point(b, a.end) == 0)) ||   //
+				(((side_of_point(b, a.start) + side_of_point(b, a.end)) == 0) && (side_of_point(a, b.start) * side_of_point(a, b.end)) == 0))
 				return true;
 
 			else
@@ -154,17 +123,28 @@ and checks whether the point is on the left or right side of the line
 * If the point is collinear the left test passes
 */
 
-bool left_test_2d(line l, pos p)
+bool left_test_2d(const line &l, const pos &p)
 {
 	pos p1 = l.end - l.start, p2 = p - l.start;
-	if(p1.x * p2.y - p2.x * p1.y > 0)
+	if (p1.x * p2.y - p2.x * p1.y > 0)
+		return true;
+	else
+		return false;
+}
+
+bool left_test_3d(const plane &p, const pos &a)
+{
+	pos centroid = (p.a + p.b + p.c) / 3;
+	pos vec = a - centroid;
+
+	if (vec.x * p.normal.x + vec.y * p.normal.y + vec.z * p.normal.z > 0) //TO BE DETERMINED
 		return true;
 	else
 		return false;
 }
 
 //If the absolute value of the square of the area of the triangle is less than epsilon then the function returns true
-bool is_collinear(line l, pos p)
+bool is_collinear(const line &l, const pos &p)
 {
 	double sq_area;
 	double l1, l2, l3, s;
@@ -175,6 +155,15 @@ bool is_collinear(line l, pos p)
 	sq_area = (s * (s - l1) * (s - l2) * (s - l3));
 
 	if (fabs(sq_area) < epsilon)
+		return true;
+	else
+		return false;
+}
+
+bool is_collinear(const plane &p, const pos &x)
+{
+	double volume = fabs(1 / 6 * (dot(cross(p.a - x, p.b - x), p.c - x)));
+	if(volume < epsilon)
 		return true;
 	else
 		return false;

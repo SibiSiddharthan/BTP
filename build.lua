@@ -48,3 +48,4 @@ project "Mesh"
 		objdir ("./obj/ms/")
 		filter {"configurations:Release"}
 			optimize "On"
+			symbols("Off")

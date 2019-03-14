@@ -168,13 +168,13 @@ int main()
 	_2D_ boundary;
 	mesh M;
 	boundary.attach_window(window);
-	boundary.add_boundary_circle(0.6, 0.3);
+	boundary.add_boundary_circle(0.6, 0.1);
 	//boundary.add_hole_square({ 0,0,0 }, 0.4, 0.05);
 	//boundary.add_boundary_square( 0.8, 0.05);
-	/*boundary.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
+	boundary.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
 	boundary.add_hole_circle({ -0.2,0.2 }, 0.1, 0.2);
 	boundary.add_hole_circle({ 0.2,-0.2 }, 0.1, 0.2);
-	boundary.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);*/
+	boundary.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);
 	//boundary.dxf_read("tests/polyline.dxf", 4.0);
 
 	//glfwWaitEventsTimeout(100.0);

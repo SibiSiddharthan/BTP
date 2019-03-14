@@ -181,10 +181,7 @@ void _2D_::display()
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		va_node.bind();
 		va_node.draw();
-
-		va_edge.bind();
 		va_edge.draw();
 
 		glfwSwapBuffers(window);

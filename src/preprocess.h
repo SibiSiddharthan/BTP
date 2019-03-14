@@ -28,5 +28,6 @@ constexpr double pi = 3.14159265358979323;
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <functional>
 
 #endif  

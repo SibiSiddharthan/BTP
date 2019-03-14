@@ -9,8 +9,26 @@ struct pos
 	pos(double _x = 0, double _y = 0, double _z = 0) : x{_x}, y{_y}, z{_z}
 	{
 	}
+
+	inline double norm()
+	{
+		return sqrt(x*x + y*y + z*z);
+	}
+	
 };
 
+namespace std
+{
+template<>
+struct hash<pos>
+{
+	inline std::size_t operator()(const pos &p) const
+	{
+		using std::hash;
+		return (((hash<double>()(p.x) ^ hash<double>()(p.y) << 1 ) >> 1) ^ (hash<double>()(p.z) << 1));
+	}
+};
+}
 
 //operators;
 inline pos operator+(const pos p, const pos q)

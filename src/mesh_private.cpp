@@ -30,6 +30,14 @@ void mesh::make_inside_edge(const node_id start, const node_id end, bool availab
 	N[end].IE.push_back(E.size() - 1);
 }
 
+void mesh::make_inside_plane(const node_id a, const node_id b, const node_id c, bool availability)
+{
+	P.push_back({a, b, c, P.size(), plane_location::inside, availability});
+
+	//N[start].IE.push_back(E.size() - 1);
+	//N[end].IE.push_back(E.size() - 1);
+}
+
 //updated on 23/8/18
 double mesh::avg_area_of_triangles()
 {
@@ -49,6 +57,31 @@ double mesh::avg_area_of_triangles_near_boundary(node_location loc)
 		if (N[m_t.a].location == loc || N[m_t.b].location == loc || N[m_t.c].location == loc)
 		{
 			res += triangle_area(m_t);
+			++count;
+		}
+	return res / count;
+}
+
+double mesh::avg_volume_of_tetrahedrons()
+{
+	double res = 0;
+	uint64_t count = 0;
+	for (const tetrahedron &m_te : TH)
+	{
+		res += tetrahedron_volume(m_te);
+		++count;
+	}
+	return res / count;
+}
+
+double mesh::avg_volume_of_tetrahedrons_near_boundary(node_location loc)
+{
+	double res = 0;
+	uint64_t count = 0;
+	for (const tetrahedron &m_te : TH)
+		if (N[m_te.a].location == loc || N[m_te.b].location == loc || N[m_te.c].location == loc || N[m_te.d].location == loc)
+		{
+			res += tetrahedron_volume(m_te);
 			++count;
 		}
 	return res / count;
@@ -279,4 +312,41 @@ void mesh::update_pdata()
 			pdata.push_back((float)n.p.z);
 		}
 	}
+}
+
+void mesh::node_tetrahedron_share_sweep()
+{
+	for (node &m_n : N)
+		m_n.TH.clear();
+
+	for (const tetrahedron &m_th : TH)
+	{
+		N[m_th.a].TH.push_back(m_th.id);
+		N[m_th.b].TH.push_back(m_th.id);
+		N[m_th.c].TH.push_back(m_th.id);
+		N[m_th.d].TH.push_back(m_th.id);
+	}
+}
+
+void node_plane_share_sweep();
+void plane_tetrahedron_share_sweep();
+void tetrahedron_plane_share_sweep();
+
+void mesh::make_inside_plane(const node_id a, const node_id b, const node_id c,bool availability)
+{
+	P.push_back({a, b, c, P.size(), plane_location::inside, availability});
+
+	N[a].IP.push_back(P.size() - 1);
+	N[b].IP.push_back(P.size() - 1);
+	N[c].IP.push_back(P.size() - 1);
+}
+
+void mesh::make_tetrahedron(const node_id a, const node_id b, const node_id c,const node_id d, tetrahedron_type tp= tetrahedron_type::domain)
+{
+	TH.push_back({a, b, c,d, TH.size(), tp});
+
+	N[a].TH.push_back(TH.size() - 1);
+	N[b].TH.push_back(TH.size() - 1);
+	N[c].TH.push_back(TH.size() - 1);
+	N[d].TH.push_back(TH.size() - 1);
 }
