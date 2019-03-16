@@ -6,10 +6,11 @@ layout(location = 2) in vec3 color;
 
 out vec4 node_color;
 
+uniform mat4 MVP;
 
 void main()
 {
-	gl_Position = position;
+	gl_Position = MVP * position;
 	gl_PointSize = 5.0;
 	node_color = vec4(color,0.1);
 	

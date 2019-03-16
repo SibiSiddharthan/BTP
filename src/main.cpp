@@ -6,7 +6,7 @@ using namespace std;
 
 bool quit = false;
 
-void input(_2D_ &boundary, mesh &M)
+void input(mesh &M)
 {
 
 	cout << "Enter input" << endl;
@@ -107,7 +107,8 @@ void input(_2D_ &boundary, mesh &M)
 		{
 			M.generate_mesh_basic(true);
 			M.display();
-		}break;
+		}
+		break;
 
 		case 12:
 		{
@@ -135,6 +136,21 @@ void input(_2D_ &boundary, mesh &M)
 			M.centroid_shift(true);
 			M.display();
 		}
+		break;
+
+		case 21:
+		{
+			M.generate_mesh_basic_3d();
+			M.display3d();
+		}
+		break;
+
+		case 23:
+		{
+			M.node_share_dsiplay();
+			M.display3d();
+		}
+		break;
 
 		case 999:
 		{
@@ -162,11 +178,11 @@ int main()
 	surf.stl_read("tests/sphere1.stl");
 	surf.display();
 
-	cin.get();cin.get();
+	//cin.get();cin.get();
 
-	
-	_2D_ boundary;
 	mesh M;
+	/*
+	_2D_ boundary;
 	boundary.attach_window(window);
 	boundary.add_boundary_circle(0.6, 0.1);
 	//boundary.add_hole_square({ 0,0,0 }, 0.4, 0.05);
@@ -174,28 +190,30 @@ int main()
 	boundary.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
 	boundary.add_hole_circle({ -0.2,0.2 }, 0.1, 0.2);
 	boundary.add_hole_circle({ 0.2,-0.2 }, 0.1, 0.2);
-	boundary.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);
+	boundary.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);*/
 	//boundary.dxf_read("tests/polyline.dxf", 4.0);
 
 	//glfwWaitEventsTimeout(100.0);
 
-	if (boundary.transferable)
+	//if (boundary.transferable)
 	{
-		boundary.display();
-		import_2d(M, boundary);
+		//boundary.display();
+		//import_2d(M, boundary);
+		import_3d(M, surf);
 		M.attach_window(window);
-		
+		//M.display3d_inspect();
+
 		cout << "0:stats\n1:generate triangles\n2:node insertion\n3:equalize triangles\n4:edge swap\n"
 			 << "5:equalize triangles near boundary\n6:equalize triangles near hole\n7:node shift\n8:auto generate\n9:generate ghost triangles\n10:display\n100:inspect\n999:quit\n";
 		while (!quit)
 		{
 			glfwWaitEventsTimeout(100.0);
-			input(boundary, M);
+			input(M);
 			glfwPostEmptyEvent();
 		}
 	}
 
-	else
+	//else
 	{
 		cout << "Errors in the Drawing\n";
 		cin.get();

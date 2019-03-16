@@ -12,6 +12,9 @@ extern double dy;
 extern double dz;
 extern float zoom;
 extern float zoom_change;
+extern float rotx;
+extern float roty;
+extern float rotch;
 
 struct shadersource
 {

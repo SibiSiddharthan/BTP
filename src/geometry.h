@@ -63,6 +63,7 @@ bool is_collinear(const plane &p,const pos &a);
 
 //Checks whether two lines intersec or not
 bool do_they_intersect(line, line);
+bool do_they_intersect(plane, plane);
 
 //rotations
 pos rotate_xy(pos, double);

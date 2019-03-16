@@ -28,4 +28,6 @@ class _3D_
 	{
 		return P.size();
 	}
+
+	friend void import_3d(mesh& , const _3D_ &);
 };

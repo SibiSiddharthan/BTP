@@ -78,6 +78,42 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 	}
 	break;
 
+	case GLFW_KEY_UP:
+	{
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			rotx -= rotch;
+		}
+	}
+	break;
+
+	case GLFW_KEY_DOWN:
+	{
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			rotx += rotch;
+		}
+	}
+	break;
+
+	case GLFW_KEY_LEFT:
+	{
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			roty -= rotch;
+		}
+	}
+	break;
+
+	case GLFW_KEY_RIGHT:
+	{
+		if (action == GLFW_PRESS || action == GLFW_REPEAT)
+		{
+			roty += rotch;
+		}
+	}
+	break;
+
 	case GLFW_KEY_ESCAPE:
 	{
 		if (action == GLFW_PRESS)
@@ -85,6 +121,8 @@ void keycallback(GLFWwindow *window, int key, int scancode, int action, int mods
 			return_to_console = true;
 			zoom = 1.0;
 			p = {0, 0};
+			rotx = 0;
+			roty = 0;
 		}
 	}
 	break;
@@ -193,5 +231,3 @@ int create_window(GLFWwindow *&window, int width, int height)
 
 	return 1;
 }
-
-

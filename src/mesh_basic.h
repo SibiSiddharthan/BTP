@@ -150,6 +150,7 @@ struct mesh_plane
 	uint64_t id;
 	plane_location location = plane_location::boundary;
 	bool availability = true;
+	std::vector<tetrahedron_id> TH;
 
 	inline mesh_plane()
 	{
@@ -170,7 +171,7 @@ struct mesh_plane
 		a{_a} ,b{_b}, c{_c},id{_id},
 		availability{_availability}, location{_location}
 	{
-		normal = cross(c-a,c-b);//!Have to Check
+		normal = cross(a-c,b-c);//!Have to Check
 	}
 
 	
@@ -181,6 +182,8 @@ struct tetrahedron
 	uint64_t a, b, c, d;
 	uint64_t id = 0;
 	tetrahedron_type type = tetrahedron_type::domain;
+	std::vector<plane_id> P;
+
 	inline tetrahedron()
 	{
 		a = 0;

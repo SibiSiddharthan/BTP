@@ -7,18 +7,21 @@ except mesh::display()
 
 using namespace std;
 
-void mesh::init_2d()
-{
-	type = mesh_type::_2d;
-}
-
 //updated on 29/8/18
 void import_2d(mesh &M, const _2D_ &_2d_)
 {
-	M.init_2d();
+	M.type = mesh_type::_2d;
 
 	M.N = _2d_.N;
 	M.E = _2d_.E;
+}
+
+void import_3d(mesh &M, const _3D_ &_3d_)
+{
+	M.type = mesh_type::_3d;
+
+	M.N = _3d_.N;
+	M.P = _3d_.P;
 }
 
 //updated on 29/8/18
@@ -104,7 +107,7 @@ void mesh::generate_mesh_basic(bool debug)
 				e2.start = E[i].start;
 				e2.end = N[k].id;
 
-				e_id = edge_exists(E, e1);
+				e_id = edge_exists(e1);
 				if (e_id != -1)
 				{
 					E[e_id].availability = false;
@@ -115,7 +118,7 @@ void mesh::generate_mesh_basic(bool debug)
 				else
 					make_inside_edge(e1.start, e1.end, true);
 
-				e_id = edge_exists(E, e2);
+				e_id = edge_exists(e2);
 				if (e_id != -1)
 				{
 					E[e_id].availability = false;
@@ -829,21 +832,20 @@ void mesh::generate_mesh_basic_3d()
 				{
 					if (left_test(P[i], N[j]) && collinear_test(P[i], N[j]))
 					{
-
 						//Have to check
-						p1.a = N[j].id;
+						p1.a = P[i].b;
 						p1.b = P[i].a;
-						p1.c = P[i].b;
+						p1.c = N[j].id;
 
-						p2.b = N[j].id;
-						p2.a = P[i].c;
+						p2.a = N[j].id;
+						p2.b = P[i].c;
 						p2.c = P[i].b;
 
-						p3.c = N[j].id;
-						p3.a = P[i].a;
-						p3.b = P[i].c;
+						p3.a = P[i].c;
+						p3.b = N[j].id;
+						p3.c = P[i].a;
 
-						if (true)//intersection_test(e1, E) && intersection_test(e2, E))
+						if (intersection_test(p1, P) && intersection_test(p2, P) && intersection_test(p3,P))
 						{
 							temp = distance((N[P[i].a].p + N[P[i].b].p + N[P[i].c].p) * 0.333, N[j].p);
 							if (temp < min_dist)
@@ -859,54 +861,55 @@ void mesh::generate_mesh_basic_3d()
 			if (P[i].availability && k > -1)
 			{
 				//Have to check
-				p1.a = N[k].id;
+				p1.a = P[i].b;
 				p1.b = P[i].a;
-				p1.c = P[i].b;
+				p1.c = N[k].id;
 
-				p2.b = N[k].id;
-				p2.a = P[i].c;
+				p2.a = N[k].id;
+				p2.b = P[i].c;
 				p2.c = P[i].b;
 
-				p3.c = N[k].id;
-				p3.a = P[i].a;
-				p3.b = P[i].c;
+				p3.a = P[i].c;
+				p3.b = N[k].id;
+				p3.c = P[i].a;
 
-				p_id = plane_exists(P, p1);
+				p_id = plane_exists(p1);
 				if (p_id != -1)
 				{
 					P[p_id].availability = false;
 					p1.id = p_id;
-					//disable_common_node(e1, E[i]);
+					disable_common_node(p1, P[i]);
 				}
 
 				else
-					make_inside_plane(p1.a, p1.b,p1.c, true);
+					make_inside_plane(p1.a, p1.b, p1.c, true);
 
-				p_id = plane_exists(P, p2);
+				p_id = plane_exists(p2);
 				if (p_id != -1)
 				{
 					P[p_id].availability = false;
 					p2.id = p_id;
-					//disable_common_node(e2, E[i]);
+					disable_common_node(p2, P[i]);
 				}
 				else
-					make_inside_plane(p2.a, p2.b,p2.c, true);
-				
-				p_id = plane_exists(P, p3);
+					make_inside_plane(p2.a, p2.b, p2.c, true);
+
+				p_id = plane_exists(p3);
 				if (p_id != -1)
 				{
 					P[p_id].availability = false;
 					p3.id = p_id;
-					//disable_common_node(e2, E[i]);
+					disable_common_node(p3, P[i]);
 				}
 
 				else
-					make_inside_plane(p3.a, p3.b,p3.c, true);
+					make_inside_plane(p3.a, p3.b, p3.c, true);
 
-
-				//make_tetrahedron(E[i].start, E[i].end, N[k].id);
+				make_tetrahedron(P[i].a, P[i].b, P[i].c, N[k].id);
 				P[i].availability = false;
 			}
 		}
+		cout << number_of_unused_planes(P);
+		return;
 	}
 }

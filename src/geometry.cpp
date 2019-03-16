@@ -12,7 +12,7 @@ const double area_of_triangle(const pos a, const pos b, const pos c)
 	return sqrt(s * (s - l1) * (s - l2) * (s - l3));
 }
 
-const double volume_of_tetrahedron(const pos a,const pos b,const pos c,const pos d)
+const double volume_of_tetrahedron(const pos a, const pos b, const pos c, const pos d)
 {
 	return fabs(1 / 6 * (dot(cross(a - d, b - d), c - d)));
 }
@@ -110,6 +110,170 @@ bool do_they_intersect(line a, line b)
 		return false;
 }
 
+bool do_they_intersect(plane p1, plane p2)
+{
+	//p1 is base, p2 is tested
+	pos point_of_intersection;
+	double dot_line_plane_normal;
+	pos line_vector;
+	pos cross_a, cross_b, cross_c, cross_d, cross_e,cross_f,cross_g;
+
+	//segment 1 a-b
+	line_vector = p2.b - p2.a;
+	dot_line_plane_normal = dot(line_vector, p1.normal);
+	if (dot_line_plane_normal != 0)
+	{
+		point_of_intersection = p2.a + line_vector * ((dot(p1.a, p1.normal) - dot(p2.a, p1.normal)) / dot_line_plane_normal);
+		cross_a = cross(p1.b - p1.a, point_of_intersection - p1.a);
+		cross_b = cross(p1.c - p1.b, point_of_intersection - p1.b);
+		cross_c = cross(p1.a - p1.c, point_of_intersection - p1.c);
+		if (dot(cross_a, cross_b) > 0 && dot(cross_a, cross_c) > 0)
+		{
+			return true;
+		}
+	}
+
+	else
+	{
+		//base segement 1 a-b
+		cross_d = cross(p2.b - p2.a, p1.a - p2.a);
+		cross_e = cross(p2.b - p2.a, p1.b - p2.a);
+		cross_f = cross(p1.b - p1.a, p2.a - p1.a);
+		cross_g = cross(p1.b - p1.a, p2.b - p1.a);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 2 b-c
+		cross_d = cross(p2.b - p2.a, p1.b - p2.a);
+		cross_e = cross(p2.b - p2.a, p1.c - p2.a);
+		cross_f = cross(p1.c - p1.b, p2.a - p1.b);
+		cross_g = cross(p1.c - p1.b, p2.b - p1.b);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 3 c-a
+		cross_d = cross(p2.b - p2.a, p1.c - p2.a);
+		cross_e = cross(p2.b - p2.a, p1.a - p2.a);
+		cross_f = cross(p1.a - p1.c, p2.a - p1.c);
+		cross_g = cross(p1.a - p1.c, p2.b - p1.c);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+	}
+
+	//segment 2 b-c
+	line_vector = p2.c - p2.b;
+	dot_line_plane_normal = dot(line_vector, p1.normal);
+	if (dot_line_plane_normal != 0)
+	{
+		point_of_intersection = p2.b + line_vector * ((dot(p1.a, p1.normal) - dot(p2.b, p1.normal)) / dot_line_plane_normal);
+		cross_a = cross(p1.b - p1.a, point_of_intersection - p1.a);
+		cross_b = cross(p1.c - p1.b, point_of_intersection - p1.b);
+		cross_c = cross(p1.a - p1.c, point_of_intersection - p1.c);
+		if (dot(cross_a, cross_b) > 0 && dot(cross_a, cross_c) > 0)
+		{
+			return true;
+		}
+	}
+
+	else
+	{
+		//base segement 1 a-b
+		cross_d = cross(p2.c - p2.b, p1.a - p2.b);
+		cross_e = cross(p2.c - p2.b, p1.b - p2.b);
+		cross_f = cross(p1.b - p1.a, p2.b - p1.a);
+		cross_g = cross(p1.b - p1.a, p2.c - p1.a);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 2 b-c
+		cross_d = cross(p2.c - p2.b, p1.b - p2.b);
+		cross_e = cross(p2.c - p2.b, p1.c - p2.b);
+		cross_f = cross(p1.c - p1.b, p2.b - p1.b);
+		cross_g = cross(p1.c - p1.b, p2.c - p1.b);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 3 c-a
+		cross_d = cross(p2.c - p2.b, p1.c - p2.b);
+		cross_e = cross(p2.c - p2.b, p1.a - p2.b);
+		cross_f = cross(p1.a - p1.c, p2.b - p1.c);
+		cross_g = cross(p1.a - p1.c, p2.c - p1.c);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+	}
+
+	//segment 3 c-a
+	line_vector = p2.c - p2.a;
+	dot_line_plane_normal = dot(line_vector, p1.normal);
+	if (dot_line_plane_normal != 0)
+	{
+		point_of_intersection = p2.c + line_vector * ((dot(p1.a, p1.normal) - dot(p2.c, p1.normal)) / dot_line_plane_normal);
+		cross_a = cross(p1.b - p1.a, point_of_intersection - p1.a);
+		cross_b = cross(p1.c - p1.b, point_of_intersection - p1.b);
+		cross_c = cross(p1.a - p1.c, point_of_intersection - p1.c);
+		if (dot(cross_a, cross_b) > 0 && dot(cross_a, cross_c) > 0)
+		{
+			return true;
+		}
+	}
+
+	else
+	{
+		//base segement 1 a-b
+		cross_d = cross(p2.a - p2.c, p1.a - p2.c);
+		cross_e = cross(p2.a - p2.c, p1.b - p2.c);
+		cross_f = cross(p1.b - p1.a, p2.c - p1.a);
+		cross_g = cross(p1.b - p1.a, p2.a - p1.a);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 2 b-c
+		cross_d = cross(p2.a - p2.c, p1.b - p2.c);
+		cross_e = cross(p2.a - p2.c, p1.c - p2.c);
+		cross_f = cross(p1.c - p1.b, p2.c - p1.b);
+		cross_g = cross(p1.c - p1.b, p2.a - p1.b);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+
+		//base segement 3 c-a
+		cross_d = cross(p2.a - p2.c, p1.c - p2.c);
+		cross_e = cross(p2.a - p2.c, p1.a - p2.c);
+		cross_f = cross(p1.a - p1.c, p2.c - p1.c);
+		cross_g = cross(p1.a - p1.c, p2.a - p1.c);
+		if (dot(cross_d, p1.normal) * dot(cross_e, p1.normal) < 0 &&
+			dot(cross_f, p1.normal) * dot(cross_g, p1.normal) < 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 // TODO
 pos intersection_point(line a, line b)
 {
@@ -136,8 +300,9 @@ bool left_test_3d(const plane &p, const pos &a)
 {
 	pos centroid = (p.a + p.b + p.c) / 3;
 	pos vec = a - centroid;
+	pos normal = centroid + p.normal * 0.5;
 
-	if (vec.x * p.normal.x + vec.y * p.normal.y + vec.z * p.normal.z > 0) //TO BE DETERMINED
+	if (vec.x * normal.x + vec.y * normal.y + vec.z * normal.z < 0) //Normals are pointed outwards
 		return true;
 	else
 		return false;
@@ -162,8 +327,8 @@ bool is_collinear(const line &l, const pos &p)
 
 bool is_collinear(const plane &p, const pos &x)
 {
-	double volume = fabs(1 / 6 * (dot(cross(p.a - x, p.b - x), p.c - x)));
-	if(volume < epsilon)
+	double volume = fabs((dot(cross(p.a - x, p.b - x), p.c - x))) / 6;
+	if (volume < epsilon)
 		return true;
 	else
 		return false;
