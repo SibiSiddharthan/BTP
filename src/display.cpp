@@ -180,7 +180,7 @@ unsigned int compileshader(unsigned int type, const std::string &source)
 		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
 		char *message = (char *)alloca(length * sizeof(char));
 		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "fail/n" << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << std::endl
+		std::cout << "fail\n" << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << std::endl
 				  << message << std::endl;
 		glDeleteShader(id);
 		return 0;

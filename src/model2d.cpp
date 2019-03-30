@@ -1,9 +1,11 @@
-#include "2d.h"
+#include "model2d.h"
 #include "dxfreader.h"
 
 using namespace std;
 
-void _2D_::add_boundary_circle(double r, double dx)
+namespace __2d__
+{
+void model::add_boundary_circle(double r, double dx)
 {
 	pos temp(r, 0);
 	int i = 1;
@@ -31,7 +33,7 @@ void _2D_::add_boundary_circle(double r, double dx)
 	}
 }
 
-void _2D_::add_boundary_square(double a, double dx)
+void model::add_boundary_square(double a, double dx)
 {
 	const uint64_t c = (uint64_t)(a / dx);
 
@@ -61,7 +63,7 @@ void _2D_::add_boundary_square(double a, double dx)
 	}
 }
 
-void _2D_::add_hole_circle(pos p, double r, double dx)
+void model::add_hole_circle(pos p, double r, double dx)
 {
 	pos temp(r + p.x, p.y);
 	int i = -1;
@@ -87,7 +89,7 @@ void _2D_::add_hole_circle(pos p, double r, double dx)
 	}
 }
 
-void _2D_::add_hole_square(pos p, double a, double dx)
+void model::add_hole_square(pos p, double a, double dx)
 {
 	pos lb = {p.x - (a * 0.5), p.y - (a * 0.5)};
 	pos lt = {p.x - (a * 0.5), p.y + (a * 0.5)};
@@ -120,7 +122,8 @@ void _2D_::add_hole_square(pos p, double a, double dx)
 	}
 }
 
-void _2D_::display()
+
+void model::display_old(window& w)
 {
 	vector<float> posdata(3 * number_of_nodes());
 	vector<GLuint> node_index(number_of_nodes());
@@ -173,7 +176,16 @@ void _2D_::display()
 	va_edge.unbind();
 
 	shadersource src = parseshader("src/shaders/debug_display.glsl");
-	unsigned int shader = createshader(src.vertex, src.fragment);
+	unsigned int shader = glCreateProgram();
+	unsigned int vs = compileshader(GL_VERTEX_SHADER, src.vertex);
+	unsigned int fs = compileshader(GL_FRAGMENT_SHADER, src.fragment);
+	glAttachShader(shader, vs);
+	glAttachShader(shader, fs);
+	glLinkProgram(shader);
+	glValidateProgram(shader);
+
+	glDeleteShader(vs);
+	glDeleteShader(fs);
 	glUseProgram(shader);
 
 	glEnable(GL_PROGRAM_POINT_SIZE);
@@ -184,13 +196,13 @@ void _2D_::display()
 		va_node.draw();
 		va_edge.draw();
 
-		glfwSwapBuffers(window);
+		w.swap_buffers();
 	}
 
 	glDeleteProgram(shader);
 }
 
-void _2D_::dxf_read(const std::string filepath, double dx)
+void model::dxf_read(const std::string filepath, double dx)
 {
 	ifstream f;
 	vector<line> L;
@@ -240,7 +252,7 @@ void _2D_::dxf_read(const std::string filepath, double dx)
 	}
 }
 
-void _2D_::intersections(vector<line> &l, vector<pair<line, line>> &il)
+void model::intersections(vector<line> &l, vector<pair<line, line>> &il)
 {
 
 	for (int i = 0; i < l.size(); i++)
@@ -255,7 +267,7 @@ void _2D_::intersections(vector<line> &l, vector<pair<line, line>> &il)
 	}
 }
 
-void _2D_::branches_and_gaps(vector<line> &l, vector<pos> &p)
+void model::branches_and_gaps(vector<line> &l, vector<pos> &p)
 {
 	pos *plist = new pos[2 * l.size()];
 	int count = 0;
@@ -328,3 +340,65 @@ void _2D_::branches_and_gaps(vector<line> &l, vector<pos> &p)
 	delete[] plist;
 	delete[] pcount;
 }
+
+vector<float> model::export_vertex_data() const
+{
+	vector<float> POS(3 * N.size());
+	size_t k = 0;
+	for (size_t i = 0; i < 3 * N.size(); i += 3)
+	{
+		k = i / 3;
+		POS[i + 0] = float(N[k].p.x);
+		POS[i + 1] = float(N[k].p.y);
+		POS[i + 2] = float(N[k].p.z);
+	}
+	return POS;
+}
+
+vector<uint32_t> model::export_node_index() const
+{
+	vector<uint32_t> I(N.size());
+	for (size_t i = 0; i < N.size(); ++i)
+		I[i] = N[i].id;
+	return I;
+}
+
+vector<uint32_t> model::export_edge_index() const
+{
+	vector<uint32_t> I(E.size() * 2);
+	size_t k = 0;
+	for (size_t i = 0; i < E.size() * 2; i += 2)
+	{
+		k = i / 2;
+		I[i + 0] = uint32_t(E[k].start);
+		I[i + 1] = uint32_t(E[k].end);
+	}
+	return I;
+}
+
+void model::display(window &w)
+{
+	program p("src/shaders/debug_display.glsl");
+	draw_object D;
+	vector<float> vertex_data = export_vertex_data();
+	vector<uint32_t> node_index = export_node_index();
+	vector<uint32_t> edge_index = export_edge_index();
+	D.set_vertex_data(vertex_data);
+	
+	primitive points,edges;
+	points.indexes = node_index;
+	edges.indexes = edge_index;
+	points.object_type = primitive_types::point;
+	edges.object_type = primitive_types::line;
+	points.object_color = colors("yellow");
+	edges.object_color = colors("red");
+
+	D.set_objects(points);
+	D.set_objects(edges);
+	glClear(GL_COLOR_BUFFER_BIT);
+	D.draw_objects();
+
+	w.swap_buffers();
+	w.poll_events();
+}
+} // namespace __2d__

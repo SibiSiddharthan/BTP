@@ -1,4 +1,6 @@
-#pragma once
+#ifndef GEOMETRY_H
+#define GEOMETRY_H
+
 #include "position.h"
 #include "linear_algebra.h"
 
@@ -89,3 +91,5 @@ double angle_between_lines(pos a, pos b, pos c);
 
 double max_angle_of_triangle(pos a, pos b, pos c);
 double min_angle_of_triangle(pos a, pos b, pos c);
+
+#endif

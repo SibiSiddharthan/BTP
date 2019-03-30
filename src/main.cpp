@@ -1,11 +1,15 @@
-#include "mesh.h"
-#include "stl_reader.h"
-#include "3d.h"
+//#include "mesh.h"
+//#include "stl_reader.h"
+//#include "3d.h"
+
+#include "window.h"
+#include "mesh2d.h"
 
 using namespace std;
 
-bool quit = false;
+//bool quit = false;
 
+/*
 void input(mesh &M)
 {
 
@@ -23,6 +27,7 @@ void input(mesh &M)
 		}
 		break;
 
+		#ifdef MESH_DEBUG
 		case 1:
 		{
 			M.generate_mesh_basic();
@@ -53,14 +58,14 @@ void input(mesh &M)
 
 		case 5:
 		{
-			M.refine_triangles_near_boundary(node_location::boundary);
+			M.refine_triangles_near_boundary(__2d__::node_location::boundary);
 			M.display();
 		}
 		break;
 
 		case 6:
 		{
-			M.refine_triangles_near_boundary(node_location::hole);
+			M.refine_triangles_near_boundary(__2d__::node_location::hole);
 			M.display();
 		}
 		break;
@@ -92,17 +97,6 @@ void input(mesh &M)
 		}
 		break;
 
-		case 100:
-		{
-			glfwPostEmptyEvent();
-			cout << "Entering inspect mode\n";
-			M.display(true);
-			cout << "Returning to console\n";
-			M.display();
-			glfwWaitEventsTimeout(100.0);
-		}
-		break;
-
 		case 11:
 		{
 			M.generate_mesh_basic(true);
@@ -116,7 +110,7 @@ void input(mesh &M)
 			M.display();
 		}
 		break;
-
+		
 		case 13:
 		{
 			M.refine_triangles(true);
@@ -133,10 +127,97 @@ void input(mesh &M)
 
 		case 15:
 		{
+			M.refine_triangles_near_boundary(__2d__::node_location::boundary,true);
+			M.display();
+		}
+		break;
+
+		case 16:
+		{
+			M.refine_triangles(__2d__::node_location::hole,true);
+			M.display();
+		}
+		break;
+
+		
+		case 17:
+		{
 			M.centroid_shift(true);
 			M.display();
 		}
 		break;
+
+		#else
+
+		case 1:
+		{
+			M.generate_mesh_basic();
+			M.display();
+		}
+		break;
+
+		case 2:
+		{
+			M.node_insertion();
+			M.display();
+		}
+		break;
+
+		case 3:
+		{
+			M.refine_triangles();
+			M.display();
+		}
+		break;
+
+		case 4:
+		{
+			M.edge_swap();
+			M.display();
+		}
+		break;
+
+		case 5:
+		{
+			M.refine_triangles_near_boundary(__2d__::node_location::boundary);
+			M.display();
+		}
+		break;
+
+		case 6:
+		{
+			M.refine_triangles_near_boundary(__2d__::node_location::hole);
+			M.display();
+		}
+		break;
+
+		case 7:
+		{
+			M.centroid_shift();
+			M.display();
+		}
+		break;
+
+		case 8:
+		{
+			M.generate_mesh_full();
+			M.display();
+		}
+		break;
+
+		case 9:
+		{
+			M.generate_ghosts();
+			M.display();
+		}
+		break;
+
+		case 10:
+		{
+			M.display();
+		}break;
+
+		#endif
 
 		case 21:
 		{
@@ -149,6 +230,17 @@ void input(mesh &M)
 		{
 			M.node_share_dsiplay();
 			M.display3d();
+		}
+		break;
+
+		case 100:
+		{
+			glfwPostEmptyEvent();
+			cout << "Entering inspect mode\n";
+			M.display(true);
+			cout << "Returning to console\n";
+			M.display();
+			glfwWaitEventsTimeout(100.0);
 		}
 		break;
 
@@ -168,8 +260,18 @@ void input(mesh &M)
 	}
 }
 
+*/
 int main()
 {
+
+	window W(800,800);
+
+	__2d__::model m;
+	m.add_boundary_circle(0.6,0.1);
+	//m.display_old(W);
+	m.display(W);
+	cin.get();
+	/*
 	GLFWwindow *window = nullptr;
 	create_window(window, 800, 800);
 
@@ -194,13 +296,13 @@ int main()
 	//boundary.dxf_read("tests/polyline.dxf", 4.0);
 
 	//glfwWaitEventsTimeout(100.0);
-
+	/*
 	//if (boundary.transferable)
 	{
 		//boundary.display();
 		//import_2d(M, boundary);
-		import_3d(M, surf);
-		M.attach_window(window);
+		//import_3d(M, surf);
+		//M.attach_window(window);
 		//M.display3d_inspect();
 
 		cout << "0:stats\n1:generate triangles\n2:node insertion\n3:equalize triangles\n4:edge swap\n"
@@ -208,7 +310,7 @@ int main()
 		while (!quit)
 		{
 			glfwWaitEventsTimeout(100.0);
-			input(M);
+			//input(M);
 			glfwPostEmptyEvent();
 		}
 	}
@@ -220,7 +322,7 @@ int main()
 	}
 
 	glfwTerminate();
-
+	*/
 	cin.get();
 
 	return 0;

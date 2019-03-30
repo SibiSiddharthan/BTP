@@ -112,6 +112,15 @@ bool do_they_intersect(line a, line b)
 
 bool do_they_intersect(plane p1, plane p2)
 {
+	int a = int(left_test_3d(p1,p2.a)) + int(left_test_3d(p1,p2.b)) + int(left_test_3d(p1,p2.c));
+	int b = int(left_test_3d(p2,p1.a)) + int(left_test_3d(p2,p1.b)) + int(left_test_3d(p2,p1.c));
+	printf("%d %d\n",a,b);
+	if((a==3 || a==0) && (b==0 && b==3))
+		return false;
+	else
+		return true;
+	
+	/*
 	//p1 is base, p2 is tested
 	pos point_of_intersection;
 	double dot_line_plane_normal;
@@ -272,6 +281,7 @@ bool do_they_intersect(plane p1, plane p2)
 	}
 
 	return false;
+	*/
 }
 
 // TODO

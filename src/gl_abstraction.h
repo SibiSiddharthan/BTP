@@ -1,10 +1,72 @@
-#pragma once
+#ifndef GL_ABASTACTION_HPP
+#define GL_ABSTRACTION_HPP
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "geometry.h"
+
+struct shadersource
+{
+	std::string vertex, fragment;
+};
+
+enum class shadertype
+{
+	NONE = -1,
+	VERTEX = 0,
+	FRAGMENT = 1
+};
+
+inline shadersource parseshader(const std::string &file)
+{
+	std::ifstream f1(file);
+	std::string line;
+	std::stringstream ss[2];
+	shadertype type = shadertype::NONE;
+	while (getline(f1, line))
+	{
+		if (line.find("#shader") != std::string::npos)
+		{
+			if (line.find("vertex") != std::string::npos)
+				type = shadertype::VERTEX;
+			else if (line.find("fragment") != std::string::npos)
+				type = shadertype::FRAGMENT;
+		}
+		else
+		{
+			if ((int)type != -1)
+				ss[(int)type] << line << '\n';
+		}
+	}
+	return {ss[0].str(), ss[1].str()};
+}
+
+inline GLuint compileshader(unsigned int type, const std::string &source)
+{
+	unsigned int id = glCreateShader(type);
+	const char *src = source.c_str();
+	glShaderSource(id, 1, &src, nullptr);
+	glCompileShader(id);
+
+	int res;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &res);
+	if (res == GL_FALSE)
+	{
+		int length;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+		char *message = (char *)alloca(length * sizeof(char));
+		glGetShaderInfoLog(id, length, &length, message);
+		std::cout << "fail\n"
+				  << (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT") << std::endl
+				  << message << std::endl;
+		glDeleteShader(id);
+		return 0;
+	}
+
+	return id;
+}
 
 struct color
 {
@@ -224,7 +286,7 @@ class uniform
 		}
 	}
 
-	inline void update()
+	inline void update() const
 	{
 		switch (type)
 		{
@@ -237,4 +299,49 @@ class uniform
 			break;
 		}
 	}
+
 };
+
+class program
+{
+  private:
+	GLuint id;
+	std::vector<uniform> U;
+
+  public:
+	inline program(const std::string &shaderpath)
+	{
+		id = glCreateProgram();
+		GLuint vs, fs;
+		shadersource src = parseshader(shaderpath);
+		vs = compileshader(GL_VERTEX_SHADER, src.vertex);
+		fs = compileshader(GL_FRAGMENT_SHADER, src.fragment);
+		glAttachShader(id, vs);
+		glAttachShader(id, fs);
+		glLinkProgram(id);
+		glValidateProgram(id);
+		glDeleteShader(vs);
+		glDeleteShader(fs);
+		glUseProgram(id);
+	}
+
+	inline void set_uniform(const uniform& _u)
+	{
+		U.push_back(_u);
+	}
+
+	inline void update_uniforms()
+	{
+		for(const uniform _u:U)
+		{
+			_u.update();
+		}
+	}
+
+	inline ~program()
+	{
+		glDeleteProgram(id);
+	}
+};
+
+#endif

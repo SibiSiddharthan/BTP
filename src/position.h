@@ -1,6 +1,8 @@
-#pragma once
-#include "preprocess.h"
 
+#ifndef POSITION_HPP
+#define POSITION_HPP
+
+#include "preprocess.h"
 
 struct pos
 {
@@ -112,3 +114,4 @@ inline std::ostream &operator<<(std::ostream &out, const pos p)
 	return out;
 }
 
+#endif

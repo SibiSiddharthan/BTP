@@ -1,16 +1,18 @@
-#include "3d.h"
+#include "model3d.h"
 #include "stl_reader.h"
 using namespace std;
 
-void _3D_::stl_read(const string filepath)
+namespace __3d__
+{
+void model::stl_read(const string filepath)
 {
 	ifstream f;
-	vector<plane> _P;
+	vector<::plane> _P;
 	read_stl(f, "tests/sphere1.stl", _P);
 
 	unordered_map<pos, uint64_t> s;
 	uint64_t n = 0;
-	for (const plane &p : _P)
+	for (const ::plane &p : _P)
 	{
 		if (s.find(p.a) == s.end())
 			s.insert({p.a, n++});
@@ -28,13 +30,14 @@ void _3D_::stl_read(const string filepath)
 		N[m_id] = {m_pos, m_id, node_location::boundary};
 	}
 
-	for (const plane &p : _P)
+	for (const ::plane &p : _P)
 	{
 		P.push_back({s[p.a], s[p.b], s[p.c], p.normal, P.size()});
 	}
 }
 
-void _3D_::display()
+/*
+void model::display()
 {
 
 	vector<float> posdata(3 * number_of_nodes());
@@ -154,4 +157,6 @@ void _3D_::display()
 	glfwSwapBuffers(window);
 
 	glDeleteProgram(shader);
+}
+*/
 }
