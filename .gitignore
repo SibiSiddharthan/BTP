@@ -11,3 +11,7 @@ tests/
 .vs/
 obj/
 .vscode/
+build/
+bin/
+lib/
+include/
