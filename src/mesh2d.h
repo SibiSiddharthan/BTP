@@ -203,7 +203,7 @@ class mesh
 
 	
 	//Displays the mesh onto the screen
-	void display(const window *_window,bool inspect = false);
+	void display(window *_window,bool inspect = false);
 
 	
 	

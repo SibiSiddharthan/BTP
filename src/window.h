@@ -9,6 +9,7 @@ class window
 {
   private:
 	GLFWwindow *_window;
+	int width,height;
 	/*
 	static pos p;
 	static float dx,dy,dz;
@@ -17,9 +18,10 @@ class window
 	static float rotx, roty, rotch;
 	static bool return_to_console;
 	*/
+
   public:
 	friend void event_keyboard(GLFWwindow *__window, int key, int scancode, int action, int mods) ;
-	window(int width = 800, int height = 800);
+	window(int _width = 800, int _height = 800);
 
 	/*
 	inline pos get_pos()

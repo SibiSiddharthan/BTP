@@ -4,7 +4,7 @@
 
 using namespace std;
 
-window::window(int width, int height)
+window::window(int _width, int _height):width{_width},height{_height}
 {
 	/*
 	p = {0,0,0};

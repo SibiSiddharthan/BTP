@@ -338,6 +338,11 @@ class program
 		}
 	}
 
+	inline GLuint get_id()
+	{
+		return id;
+	}
+
 	inline ~program()
 	{
 		glDeleteProgram(id);

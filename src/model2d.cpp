@@ -122,75 +122,45 @@ void model::add_hole_square(pos p, double a, double dx)
 	}
 }
 
-
-void model::display_old(window& w)
+void model::display_old(window &w)
 {
-	vector<float> posdata(3 * number_of_nodes());
-	vector<GLuint> node_index(number_of_nodes());
-	vector<GLuint> edge_index(2 * number_of_edges());
+	vector<float> posdata = export_vertex_data();
+	vector<GLuint> node_index = export_node_index();
+	vector<GLuint> edge_index = export_edge_index();
 	vector<color> node_color(number_of_nodes(), colors("yellow"));
-	vector<color> edge_color(2 * number_of_edges(), colors("red"));
+	vector<color> edge_color(number_of_nodes(), colors("red"));
 	vector<float> node_size(number_of_nodes(), 5.0);
-	uint64_t k = 0;
 
-	for (size_t i = 0; i < 3 * number_of_nodes(); i += 3)
+	if (number_of_nodes() > 0 && number_of_edges() > 0)
 	{
-		k = i / 3;
-		posdata[i + 0] = (float)N[k].p.x;
-		posdata[i + 1] = (float)N[k].p.y;
-		posdata[i + 2] = (float)N[k].p.z;
-	}
+		data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
+		vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
 
-	for (size_t i = 0; i < number_of_nodes(); ++i)
-		node_index[i] = GLuint(i);
+		data_buffer ib_node(GL_ELEMENT_ARRAY_BUFFER, node_index), ib_edge(GL_ELEMENT_ARRAY_BUFFER, edge_index);
 
-	for (size_t i = 0; i < 2 * number_of_edges(); i += 2)
-	{
-		k = i / 2;
-		edge_index[i + 0] = GLuint(E[k].start);
-		edge_index[i + 1] = GLuint(E[k].end);
-	}
+		data_buffer cb_node(GL_ARRAY_BUFFER, node_color);
+		cb_node.configure_layout(2, 3, 3, GL_FLOAT);
 
-	data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
-	vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
+		data_buffer cb_edge(GL_ARRAY_BUFFER, edge_color);
+		cb_edge.configure_layout(2, 3, 3, GL_FLOAT);
 
-	data_buffer ib_node(GL_ELEMENT_ARRAY_BUFFER, node_index), ib_edge(GL_ELEMENT_ARRAY_BUFFER, edge_index);
+		data_buffer db_node_size(GL_ARRAY_BUFFER, node_size);
+		db_node_size.configure_layout(3, 1, 1, GL_FLOAT);
 
-	data_buffer cb_node(GL_ARRAY_BUFFER, node_color);
-	cb_node.configure_layout(2, 3, 3, GL_FLOAT);
+		vertex_array va_node(GL_POINTS), va_edge(GL_LINES);
 
-	data_buffer cb_edge(GL_ARRAY_BUFFER, edge_color);
-	cb_edge.configure_layout(2, 3, 3, GL_FLOAT);
+		va_node.bind();
+		va_node.bind_buffer({&vb_pos, &cb_node, &db_node_size, &ib_node});
+		va_node.unbind();
 
-	data_buffer db_node_size(GL_ARRAY_BUFFER, node_size);
-	db_node_size.configure_layout(3, 1, 1, GL_FLOAT);
+		va_edge.bind();
+		va_edge.bind_buffer({&vb_pos, &cb_edge, &ib_edge});
+		va_edge.unbind();
 
-	vertex_array va_node(GL_POINTS), va_edge(GL_LINES);
+		program prog("src/shaders/debug_display.glsl");
 
-	va_node.bind();
-	va_node.bind_buffer({&vb_pos, &cb_node, &db_node_size, &ib_node});
-	va_node.unbind();
+		glEnable(GL_PROGRAM_POINT_SIZE);
 
-	va_edge.bind();
-	va_edge.bind_buffer({&vb_pos, &cb_edge, &ib_edge});
-	va_edge.unbind();
-
-	shadersource src = parseshader("src/shaders/debug_display.glsl");
-	unsigned int shader = glCreateProgram();
-	unsigned int vs = compileshader(GL_VERTEX_SHADER, src.vertex);
-	unsigned int fs = compileshader(GL_FRAGMENT_SHADER, src.fragment);
-	glAttachShader(shader, vs);
-	glAttachShader(shader, fs);
-	glLinkProgram(shader);
-	glValidateProgram(shader);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-	glUseProgram(shader);
-
-	glEnable(GL_PROGRAM_POINT_SIZE);
-
-	{
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		va_node.draw();
@@ -198,8 +168,6 @@ void model::display_old(window& w)
 
 		w.swap_buffers();
 	}
-
-	glDeleteProgram(shader);
 }
 
 void model::dxf_read(const std::string filepath, double dx)
@@ -376,6 +344,7 @@ vector<uint32_t> model::export_edge_index() const
 	return I;
 }
 
+/*
 void model::display(window &w)
 {
 	program p("src/shaders/debug_display.glsl");
@@ -384,8 +353,8 @@ void model::display(window &w)
 	vector<uint32_t> node_index = export_node_index();
 	vector<uint32_t> edge_index = export_edge_index();
 	D.set_vertex_data(vertex_data);
-	
-	primitive points,edges;
+
+	primitive points, edges;
 	points.indexes = node_index;
 	edges.indexes = edge_index;
 	points.object_type = primitive_types::point;
@@ -401,4 +370,5 @@ void model::display(window &w)
 	w.swap_buffers();
 	w.poll_events();
 }
+*/
 } // namespace __2d__

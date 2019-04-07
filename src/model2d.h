@@ -3,7 +3,7 @@
 
 #include "2d.h"
 #include "window.h"
-#include "draw_object.h"
+//#include "draw_object.h"
 
 namespace __2d__
 {
