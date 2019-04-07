@@ -389,9 +389,11 @@ void mesh::generate_ghosts()
 	ghost_generated = true;
 }
 
+/*
 void mesh::display(const window *_window,bool inspect)
 {
 	
 }
+*/
 
 } // namespace __mesh2d__

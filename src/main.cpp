@@ -269,7 +269,7 @@ int main()
 	__2d__::model m;
 	m.add_boundary_circle(0.6,0.1);
 	//m.display_old(W);
-	m.display(W);
+	m.display_old(W);
 	cin.get();
 	/*
 	GLFWwindow *window = nullptr;

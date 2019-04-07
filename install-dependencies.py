@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 
 base_dir = os.getcwd()
-install_dir = Path("{}/tbrel".format(base_dir))
+install_dir = Path("{}".format(base_dir))
 build_dir = Path("{}/build/external".format(base_dir))
 # print(install_dir)
 glew_dir = Path("{}/external/glew/build/cmake".format(base_dir))
