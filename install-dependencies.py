@@ -9,7 +9,7 @@ build_dir = Path("{}/build/external".format(base_dir))
 glew_dir = Path("{}/external/glew/build/cmake".format(base_dir))
 glfw_dir = Path("{}/external/glfw".format(base_dir))
 glm_dir = Path("{}/external/glm".format(base_dir))
-imgui_dir = Path("{}/external/imgui".format(base_dir))
+imgui_dir = Path("{}/external".format(base_dir))
 
 if os.name == "nt":
 	make = "mingw32-make.exe"
