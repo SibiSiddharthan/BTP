@@ -23,12 +23,24 @@ if(CMAKE_BUILD_TYPE STREQUAL Release)
 	endif()
 endif()
 
+if(WIN32)
+	set(EXECUTABLE mesh.exe)
+else()
+	set(EXECUTABLE mesh)
+endif()
+
 add_executable(mesh ${mesh_HEADERS} ${mesh_SOURCES})
 set_property(TARGET mesh PROPERTY CXX_STANDARD 17)
-target_link_libraries(mesh glew32 glfw3 imgui opengl32)
+
+if(WIN32)
+	target_link_libraries(mesh imgui glew32 glfw3 opengl32)
+else()
+	target_link_libraries(mesh imgui GLEW glfw3 GL rt dl pthread m X11)
+endif()
+
 target_compile_definitions(mesh PRIVATE GLEW_STATIC)
 target_include_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(mesh PUBLIC -fdiagnostics-color=always)
 target_link_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 add_custom_command(TARGET mesh POST_BUILD 
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/mesh.exe ${CMAKE_SOURCE_DIR})
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${EXECUTABLE} ${CMAKE_SOURCE_DIR})

@@ -271,7 +271,7 @@ class uniform
 	void *data;
 
   public:
-	inline uniform(GLuint shader, std::string variable, uniform_types _type, void *_data) : type{_type}, data{_data}
+	inline uniform(GLuint shader, const std::string variable, uniform_types _type, void *_data) : type{_type}, data{_data}
 	{
 		location = glGetUniformLocation(shader, variable.c_str());
 		switch (_type)
@@ -325,14 +325,14 @@ class program
 		glUseProgram(id);
 	}
 
-	inline void set_uniform(const uniform& _u)
+	inline void set_uniform(const std::string variable, uniform_types _type, void *_data)
 	{
-		U.push_back(_u);
+		U.push_back(uniform(id,variable,_type,_data));
 	}
 
 	inline void update_uniforms()
 	{
-		for(const uniform _u:U)
+		for(const uniform& _u:U)
 		{
 			_u.update();
 		}

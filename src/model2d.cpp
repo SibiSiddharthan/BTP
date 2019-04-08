@@ -1,6 +1,6 @@
 #include "model2d.h"
 #include "dxfreader.h"
-
+#include "gl_abstraction.h"
 using namespace std;
 
 namespace __2d__
@@ -23,8 +23,10 @@ void model::add_boundary_circle(double r, double dx)
 	for (size_t j = n; j < number_of_nodes(); j++)
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id), E.size(), edge_location::boundary, true});
 
+	/*
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
+	*/
 
 	for (size_t i = e; i < number_of_edges(); i++)
 	{
@@ -54,8 +56,10 @@ void model::add_boundary_square(double a, double dx)
 	for (size_t j = n; j < number_of_nodes(); j++)
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id), E.size(), edge_location::boundary, true});
 
+	/*
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
+	*/
 	for (size_t i = e; i < number_of_edges(); i++)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
@@ -80,8 +84,10 @@ void model::add_hole_circle(pos p, double r, double dx)
 	for (size_t j = n; j < number_of_nodes(); j++)
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id), E.size(), edge_location::boundary, true});
 
+	/*
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
+	*/
 	for (size_t i = e; i < number_of_edges(); i++)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
@@ -113,8 +119,10 @@ void model::add_hole_square(pos p, double a, double dx)
 	for (size_t j = n; j < number_of_nodes(); j++)
 		E.push_back({N[j].id, (j + 1 < number_of_nodes() ? N[j + 1].id : N[n].id), E.size(), edge_location::boundary, true});
 
+	/*
 	cout << "no of nodes " << number_of_nodes() << endl
 		 << "no of edges " << number_of_edges() << endl;
+	*/
 	for (size_t i = e; i < number_of_edges(); i++)
 	{
 		N[E[i].start].BE.push_back(E[i].id);
@@ -131,6 +139,8 @@ void model::display_old(window &w)
 	vector<color> edge_color(number_of_nodes(), colors("red"));
 	vector<float> node_size(number_of_nodes(), 5.0);
 
+	pos p;
+	float zoom;
 	if (number_of_nodes() > 0 && number_of_edges() > 0)
 	{
 		data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
@@ -157,16 +167,39 @@ void model::display_old(window &w)
 		va_edge.bind_buffer({&vb_pos, &cb_edge, &ib_edge});
 		va_edge.unbind();
 
-		program prog("src/shaders/debug_display.glsl");
+		program prog("src/shaders/display_2d.glsl");
+
+		p = w.get_pos();
+		zoom = w.get_zoom();
+		glm::mat4 trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
+		glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
+		glm::mat4 mvp = trans * scale;
+
+		prog.set_uniform("MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
+		prog.set_uniform("psize", uniform_types::FLOAT, (void *)&zoom);
+
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
+		glEnable(GL_LINE_SMOOTH);
 
-		glClear(GL_COLOR_BUFFER_BIT);
+		while (!w.should_close())
+		{
+			glClear(GL_COLOR_BUFFER_BIT);
 
-		va_node.draw();
-		va_edge.draw();
+			va_node.draw();
+			va_edge.draw();
 
-		w.swap_buffers();
+			p = w.get_pos();
+			zoom = w.get_zoom();
+			trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
+			scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
+			mvp = trans * scale;
+
+			prog.update_uniforms();
+
+			w.swap_buffers();
+			w.poll_events();
+		}
 	}
 }
 

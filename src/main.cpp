@@ -270,7 +270,7 @@ int main()
 	m.add_boundary_circle(0.6,0.1);
 	//m.display_old(W);
 	m.display_old(W);
-	cin.get();
+	//cin.get();
 	/*
 	GLFWwindow *window = nullptr;
 	create_window(window, 800, 800);
@@ -323,7 +323,7 @@ int main()
 
 	glfwTerminate();
 	*/
-	cin.get();
+	//cin.get();
 
 	return 0;
 }

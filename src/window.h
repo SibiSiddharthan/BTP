@@ -3,27 +3,28 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "position.h"
-#include "draw_object.h"
+//#include "draw_object.h"
 
 class window
 {
   private:
 	GLFWwindow *_window;
 	int width,height;
-	/*
-	static pos p;
-	static float dx,dy,dz;
-	static float zoom, zoom_change;
+	
+	pos p;
+	float dx,dy,dz;
+	float zoom, zoom_change;
 
-	static float rotx, roty, rotch;
-	static bool return_to_console;
-	*/
+	float rotx, roty, rotch;
+	bool return_to_console;
+	
 
   public:
-	friend void event_keyboard(GLFWwindow *__window, int key, int scancode, int action, int mods) ;
 	window(int _width = 800, int _height = 800);
-
-	/*
+	~window();
+	void event_keyboard();
+	void window_refresh();
+	
 	inline pos get_pos()
 	{
 		return p;
@@ -33,7 +34,7 @@ class window
 	{
 		return zoom;
 	}
-	*/
+	
 
 	inline void swap_buffers()
 	{
@@ -43,12 +44,15 @@ class window
 	inline void poll_events()
 	{
 		glfwPollEvents();
+		event_keyboard();
 	}
 
+	inline bool should_close()
+	{
+		return glfwWindowShouldClose(_window);
+	}
 
-
-
-	void draw(const std::string& shaders) const;
+//	void draw(const std::string& shaders) const;
 	
 };
 
