@@ -1,6 +1,7 @@
 #include "model2d.h"
 #include "dxfreader.h"
 #include "gl_abstraction.h"
+#include <fmt/core.h>
 using namespace std;
 
 namespace __2d__
@@ -130,15 +131,16 @@ void model::add_hole_square(pos p, double a, double dx)
 	}
 }
 
-void model::display_old(window &w)
+void model::display()
 {
+	window w(800,800);
 	vector<float> posdata = export_vertex_data();
 	vector<GLuint> node_index = export_node_index();
 	vector<GLuint> edge_index = export_edge_index();
 	vector<color> node_color(number_of_nodes(), colors("yellow"));
 	vector<color> edge_color(number_of_nodes(), colors("red"));
 	vector<float> node_size(number_of_nodes(), 5.0);
-
+	ImGuiWindowFlags mf = ImGuiWindowFlags_NoResize;
 	pos p;
 	float zoom;
 	if (number_of_nodes() > 0 && number_of_edges() > 0)
@@ -171,10 +173,9 @@ void model::display_old(window &w)
 
 		p = w.get_pos();
 		zoom = w.get_zoom();
-		glm::mat4 trans = glm::translate(glm::mat4(1.0), glm::vec3(p.x, p.y, p.z));
+		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(p.x, p.y, p.z));
 		glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-		glm::mat4 mvp = trans * scale;
-
+		glm::mat4 mvp =  trans * scale;
 		prog.set_uniform("MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
 		prog.set_uniform("psize", uniform_types::FLOAT, (void *)&zoom);
 
@@ -182,8 +183,13 @@ void model::display_old(window &w)
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glEnable(GL_LINE_SMOOTH);
 
+		ImGuiIO &io = ImGui::GetIO();
 		while (!w.should_close())
 		{
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			va_node.draw();
@@ -197,6 +203,14 @@ void model::display_old(window &w)
 
 			prog.update_uniforms();
 
+			ImGui::Begin("Stats",(bool*)false,mf); 
+			ImGui::Text(stats().c_str());
+			ImGui::SetWindowPos(ImVec2(0,0));
+			ImGui::End();
+
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			
 			w.swap_buffers();
 			w.poll_events();
 		}
@@ -377,31 +391,9 @@ vector<uint32_t> model::export_edge_index() const
 	return I;
 }
 
-/*
-void model::display(window &w)
+string model::stats() const
 {
-	program p("src/shaders/debug_display.glsl");
-	draw_object D;
-	vector<float> vertex_data = export_vertex_data();
-	vector<uint32_t> node_index = export_node_index();
-	vector<uint32_t> edge_index = export_edge_index();
-	D.set_vertex_data(vertex_data);
-
-	primitive points, edges;
-	points.indexes = node_index;
-	edges.indexes = edge_index;
-	points.object_type = primitive_types::point;
-	edges.object_type = primitive_types::line;
-	points.object_color = colors("yellow");
-	edges.object_color = colors("red");
-
-	D.set_objects(points);
-	D.set_objects(edges);
-	glClear(GL_COLOR_BUFFER_BIT);
-	D.draw_objects();
-
-	w.swap_buffers();
-	w.poll_events();
+	string stat = fmt::format("Number of nodes:{}\nNumber of edges:{}",number_of_nodes(),number_of_edges());
+	return stat;
 }
-*/
 } // namespace __2d__

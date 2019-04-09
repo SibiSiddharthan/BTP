@@ -264,12 +264,20 @@ void input(mesh &M)
 int main()
 {
 
-	window W(800,800);
+	//window W(800,800);
 
 	__2d__::model m;
 	m.add_boundary_circle(0.6,0.1);
-	//m.display_old(W);
-	m.display_old(W);
+	//m.display();
+
+	__2d__::mesh g;
+	//g.import_2d(m);
+	//g.generate_mesh_full();
+	//g.display();
+	//g.generate_interactive();
+	//g.save("./tests/save1.dat");
+	g.load("./tests/save1.dat");
+	g.display();
 	//cin.get();
 	/*
 	GLFWwindow *window = nullptr;

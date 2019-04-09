@@ -13,11 +13,10 @@ namespace __2d__
 //updated on 29/8/18
 void mesh::import_2d(const model &M)
 {
-	auto [_N,_E] = M.model_export();
+	auto [_N, _E] = M.model_export();
 	N = _N;
 	E = _E;
 }
-
 
 //updated on 29/8/18
 //Displays the number of nodes,number of triangles and the average area of the triangles in the mesh
@@ -395,5 +394,92 @@ void mesh::display(const window *_window,bool inspect)
 	
 }
 */
+vector<float> mesh::export_vertex_data() const
+{
+	vector<float> POS(3 * N.size());
+	size_t k = 0;
+	for (size_t i = 0; i < 3 * N.size(); i += 3)
+	{
+		k = i / 3;
+		POS[i + 0] = float(N[k].p.x);
+		POS[i + 1] = float(N[k].p.y);
+		POS[i + 2] = float(N[k].p.z);
+	}
+	return POS;
+}
 
-} // namespace __mesh2d__
+vector<uint32_t> mesh::export_node_index() const
+{
+	vector<uint32_t> I(N.size());
+	for (size_t i = 0; i < N.size(); ++i)
+		I[i] = N[i].id;
+	return I;
+}
+
+vector<uint32_t> mesh::export_edge_index() const
+{
+	vector<uint32_t> I(E.size() * 2);
+	size_t k = 0;
+	for (size_t i = 0; i < E.size() * 2; i += 2)
+	{
+		k = i / 2;
+		I[i + 0] = uint32_t(E[k].start);
+		I[i + 1] = uint32_t(E[k].end);
+	}
+	return I;
+}
+
+void mesh::save(const std::string &filepath)
+{
+	FILE *fout = fopen(filepath.c_str(), "wb");
+	fprintf(fout, "%llu %llu %llu\n", number_of_nodes(), number_of_edges(), number_of_triangles());
+	for (const node &n : N)
+		fprintf(fout, "%lf %lf\n", n.p.x, n.p.y);
+	for (const edge &e : E)
+		fprintf(fout, "%llu %llu\n", e.start, e.end);
+	for (const triangle &t : T)
+		fprintf(fout, "%llu %llu\n", t.a, t.b, t.c);
+	fclose(fout);
+}
+
+void mesh::load(const std::string &filepath)
+{
+	FILE *fin = fopen(filepath.c_str(), "rb");
+	if (fin)
+	{
+		size_t nn, ne, nt;
+		fscanf(fin, "%llu %llu %llu\n", &nn, &ne, &nt);
+
+		N.reserve(nn);
+		E.reserve(ne);
+		T.reserve(nt);
+
+		for (size_t i = 0; i < nn; ++i)
+		{
+			double x,y;
+			fscanf(fin,"%lf %lf\n",&x,&y);
+			N.push_back({{x,y,0.0},i,__2d__::node_location::boundary});
+		}
+
+		for (size_t i = 0; i < ne; ++i)
+		{
+			size_t start,end;
+			fscanf(fin,"%llu %llu\n",&start,&end);
+			E.push_back({start,end,i,__2d__::edge_location::boundary});
+		}
+
+		for (size_t i = 0; i < nt; ++i)
+		{
+			size_t a,b,c;
+			fscanf(fin,"%llu %llu %llu\n",&a,&b,&c);
+			T.push_back({a,b,c,i});
+		}
+	}
+
+	else
+		printf("file not found\n");
+
+	fclose(fin);
+}
+
+} // namespace __2d__

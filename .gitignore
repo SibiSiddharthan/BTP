@@ -15,3 +15,4 @@ build/
 bin/
 lib/
 include/
+imgui.ini

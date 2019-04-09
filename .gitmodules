@@ -10,3 +10,6 @@
 [submodule "external/glew"]
 	path = external/glew
 	url = https://www.github.com/nigels-com/glew.git
+[submodule "external/fmt"]
+	path = external/fmt
+	url = https://github.com/fmtlib/fmt.git

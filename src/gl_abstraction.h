@@ -189,9 +189,11 @@ class data_buffer
 	template <typename T>
 	inline void data(const std::vector<T> &data, GLenum _usage = GL_STATIC_DRAW)
 	{
+		bind();
 		usage = _usage;
 		size = data.size();
 		glBufferData(target, sizeof(T) * data.size(), &data[0], _usage);
+		unbind();
 	}
 
 	inline void configure_layout(GLuint m_id, GLuint m_stride, GLuint m_size, GLenum m_type, GLuint m_offset = 0)

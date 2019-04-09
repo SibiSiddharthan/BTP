@@ -5,6 +5,10 @@
 #include "position.h"
 //#include "draw_object.h"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 class window
 {
   private:
@@ -35,6 +39,15 @@ class window
 		return zoom;
 	}
 	
+	inline int get_width()
+	{
+		return float(width);
+	}
+
+	inline int get_height()
+	{
+		return float(height);
+	}
 
 	inline void swap_buffers()
 	{

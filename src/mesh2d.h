@@ -123,7 +123,7 @@ class mesh
 	void display_all_edges();
 	void display_all_triangles();
 	//void update_pdata();
-	
+	void display(window&);
   public:
 	//imports from 2d object
 	void import_2d(const model&);
@@ -179,6 +179,14 @@ class mesh
 		centroid of the triangle*/
 	void refine_triangles();
 	void refine_triangles_near_boundary(node_location);
+	void inline refine_triangles_near_bound()
+	{
+		refine_triangles_near_boundary(__2d__::node_location::boundary);
+	}
+	void inline refine_triangles_near_hole()
+	{
+		refine_triangles_near_boundary(__2d__::node_location::hole);
+	}
 
 	/*Swaps the edge of 2 adjacent triangles
 		if the minimum angle increasese after swapping*/
@@ -203,10 +211,14 @@ class mesh
 
 	
 	//Displays the mesh onto the screen
-	void display(window *_window,bool inspect = false);
+	void display();
+	void generate_interactive();
+	std::vector<float> export_vertex_data() const;
+	std::vector<uint32_t> export_node_index() const;
+	std::vector<uint32_t> export_edge_index() const;
 
-	
-	
+	void save(const std::string& filepath);
+	void load(const std::string& filepath);
 };
 
 } // namespace __mesh2d__

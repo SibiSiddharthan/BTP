@@ -10,6 +10,7 @@ glew_dir = Path("{}/external/glew/build/cmake".format(base_dir))
 glfw_dir = Path("{}/external/glfw".format(base_dir))
 glm_dir = Path("{}/external/glm".format(base_dir))
 imgui_dir = Path("{}/external".format(base_dir))
+fmt_dir = Path("{}/external/fmt".format(base_dir))
 
 if os.name == "nt":
 	make = "mingw32-make.exe"
@@ -61,7 +62,16 @@ os.system("cmake --build {}/glm --target install ".format(build_dir))
 print("Configuring Dear ImGui\n")
 os.system("cmake -G\"{}\" -S {} -B {}/imgui -DCMAKE_INSTALL_PREFIX:PATH={} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE:STRING=\"-O2 -DNDEBUG \" ".format(
 	generator[gen], imgui_dir, build_dir, install_dir))
-# Build glm
+# Build imgui
 os.system("cmake --build {}/imgui -- -j6".format(build_dir))
-# Install glm
+# Install imgui
 os.system("cmake --build {}/imgui --target install ".format(build_dir))
+
+# Configure fmt
+print("Configuring FMT\n")
+os.system("cmake -G\"{}\" -S {} -B {}/fmt -DCMAKE_INSTALL_PREFIX:PATH={} -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS_RELEASE:STRING=\"-O2 -DNDEBUG \" -DFMT_TEST=OFF -DFMT_DOC=OFF ".format(
+	generator[gen], fmt_dir, build_dir, install_dir))
+# Build fmt
+os.system("cmake --build {}/fmt -- -j6".format(build_dir))
+# Install fmt
+os.system("cmake --build {}/fmt --target install ".format(build_dir))

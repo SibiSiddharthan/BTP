@@ -33,9 +33,9 @@ add_executable(mesh ${mesh_HEADERS} ${mesh_SOURCES})
 set_property(TARGET mesh PROPERTY CXX_STANDARD 17)
 
 if(WIN32)
-	target_link_libraries(mesh imgui glew32 glfw3 opengl32)
+	target_link_libraries(mesh imgui glew32 glfw3 opengl32 fmt)
 else()
-	target_link_libraries(mesh imgui GLEW glfw3 GL rt dl pthread m X11)
+	target_link_libraries(mesh imgui GLEW glfw3 GL rt dl pthread m X11 fmt)
 endif()
 
 target_compile_definitions(mesh PRIVATE GLEW_STATIC)

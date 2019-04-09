@@ -16,12 +16,12 @@ class model
 	void branches_and_gaps(std::vector<line> &, std::vector<pos> &);
 	bool intersection_pass, branch_pass;
 
-	inline const uint64_t number_of_nodes()
+	inline const uint64_t number_of_nodes() const
 	{
 		return N.size();
 	}
 
-	inline const uint64_t number_of_edges()
+	inline const uint64_t number_of_edges() const
 	{
 		return E.size();
 	}
@@ -47,8 +47,8 @@ class model
 	//Attaches a window created by GLFW for displaying
 	
 	//Displays the 2d figure
-	void display(window& w);
-	void display_old(window& w);
+	void display();
+	//void display_old(window& w);
 
 	//Displays Errors if any when reading from a dxf file
 	//void display_import_abnormalities();
@@ -62,6 +62,9 @@ class model
 	std::vector<float> export_vertex_data() const;
 	std::vector<uint32_t> export_node_index() const;
 	std::vector<uint32_t> export_edge_index() const;
+
+	std::string stats() const;
+
 };
 }
 
