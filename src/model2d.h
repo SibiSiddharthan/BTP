@@ -26,6 +26,10 @@ class model
 		return E.size();
 	}
 
+	std::vector<float> export_vertex_data() const;
+	std::vector<uint32_t> export_node_index() const;
+	std::vector<uint32_t> export_edge_index() const;
+
   public:
 	bool transferable = true;
 
@@ -33,10 +37,10 @@ class model
 	void dxf_read(const std::string filepath, double dx = 1.0);
 
 	//Reads from the cache created from a previously used dxf file
-	void cache_read();
+	void save(const std::string &filepath);
 
 	//Writes a temporary cache from reading a dxf file
-	void cache_write();
+	void load(const std::string &filepath);
 
 	/*Simple boundary constructs for testing purposes*/
 	void add_boundary_circle(double radius, double dx);
@@ -48,7 +52,6 @@ class model
 	
 	//Displays the 2d figure
 	void display();
-	//void display_old(window& w);
 
 	//Displays Errors if any when reading from a dxf file
 	//void display_import_abnormalities();
@@ -58,10 +61,6 @@ class model
 	{
 		return std::make_tuple(N, E);
 	}
-
-	std::vector<float> export_vertex_data() const;
-	std::vector<uint32_t> export_node_index() const;
-	std::vector<uint32_t> export_edge_index() const;
 
 	std::string stats() const;
 

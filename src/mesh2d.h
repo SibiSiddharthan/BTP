@@ -123,7 +123,11 @@ class mesh
 	void display_all_edges();
 	void display_all_triangles();
 	//void update_pdata();
-	void display(window&);
+	void display_internal(window &w);
+
+	std::vector<float> export_vertex_data() const;
+	std::vector<uint32_t> export_node_index() const;
+	std::vector<uint32_t> export_edge_index() const;
   public:
 	//imports from 2d object
 	void import_2d(const model&);
@@ -140,29 +144,29 @@ class mesh
 
 	#ifdef MESH_DEBUG
 
-	void generate_mesh_basic(bool debug = false);
+	void generate_mesh_basic_debug();
 
 	/*Inserts a node into the domain
 		at the centroid of the polygon formed by
 		the triangles that share a common boundary node*/
-	void node_insertion(bool debug = false);
+	void node_insertion_debug();
 
 	/*Forms 3 triangles by joining each of the triangle's edge with the 
 		centroid of the triangle*/
-	void refine_triangles(bool debug = false);
-	void refine_triangles_near_boundary(node_location, bool debug = false);
+	void refine_triangles_debug();
+	void refine_triangles_near_boundary_debug(node_location);
 
 	/*Swaps the edge of 2 adjacent triangles
 		if the minimum angle increasese after swapping*/
-	void edge_swap(bool debug = false);
+	void edge_swap_debug();
 
 	/*Considers an inside node and changes it's
 		position to the centroid of the polygon formed
 		by all the triangles that share a common node inside the
 		domain*/
-	void centroid_shift(bool debug = false);
+	void centroid_shift_debug();
 
-	#else
+	#endif
 
 	/*Generates a simple triangulation
 		Details: Take a edge , take a node checks whether
@@ -198,9 +202,6 @@ class mesh
 		domain*/
 	void centroid_shift();
 
-	#endif
-
-
 	/*Generates a complete mesh
 		Details: First generates basic mesh next does node insertion,
 		equalize triangles and edge swap, finishes with centroid shift*/
@@ -213,9 +214,7 @@ class mesh
 	//Displays the mesh onto the screen
 	void display();
 	void generate_interactive();
-	std::vector<float> export_vertex_data() const;
-	std::vector<uint32_t> export_node_index() const;
-	std::vector<uint32_t> export_edge_index() const;
+	
 
 	void save(const std::string& filepath);
 	void load(const std::string& filepath);

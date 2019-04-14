@@ -9,9 +9,9 @@ window::window(int _width, int _height) : width{_width}, height{_height}
 {
 
 	p = {0, 0, 0};
-	dx = 0.1;
-	dy = 0.1;
-	dz = 0.1;
+	dx = 0.01;
+	dy = 0.01;
+	dz = 0.01;
 	zoom = 1;
 	zoom_change = 1.1;
 	return_to_console = false;

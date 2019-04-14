@@ -8,7 +8,7 @@ endif()
 set(mesh_HEADERS 
 	src/2d.h src/3d.h src/dxfreader.h src/position.h src/geometry.h src/gl_abstraction.h
 	src/mesh2d.h src/model2d.h src/mesh3d.h src/model3d.h src/stl_reader.h src/window.h
-	src/linear_algebra.h src/preprocess.h)
+	src/linear_algebra.h src/preprocess.h src/mesh.h src/model.h)
 
 set(mesh_SOURCES
 	src/main.cpp src/model2d.cpp src/model3d.cpp src/geometry.cpp src/stl_reader.cpp
@@ -38,7 +38,7 @@ else()
 	target_link_libraries(mesh imgui GLEW glfw3 GL rt dl pthread m X11 fmt)
 endif()
 
-target_compile_definitions(mesh PRIVATE GLEW_STATIC)
+target_compile_definitions(mesh PRIVATE GLEW_STATIC MESH_DEBUG)
 target_include_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(mesh PUBLIC -fdiagnostics-color=always)
 target_link_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/lib)

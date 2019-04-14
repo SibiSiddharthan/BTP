@@ -286,4 +286,39 @@ void mesh::update_pdata()
 
 */
 
+vector<float> mesh::export_vertex_data() const
+{
+	vector<float> POS(3 * N.size());
+	size_t k = 0;
+	for (size_t i = 0; i < 3 * N.size(); i += 3)
+	{
+		k = i / 3;
+		POS[i + 0] = float(N[k].p.x);
+		POS[i + 1] = float(N[k].p.y);
+		POS[i + 2] = float(N[k].p.z);
+	}
+	return POS;
+}
+
+vector<uint32_t> mesh::export_node_index() const
+{
+	vector<uint32_t> I(N.size());
+	for (size_t i = 0; i < N.size(); ++i)
+		I[i] = N[i].id;
+	return I;
+}
+
+vector<uint32_t> mesh::export_edge_index() const
+{
+	vector<uint32_t> I(E.size() * 2);
+	size_t k = 0;
+	for (size_t i = 0; i < E.size() * 2; i += 2)
+	{
+		k = i / 2;
+		I[i + 0] = uint32_t(E[k].start);
+		I[i + 1] = uint32_t(E[k].end);
+	}
+	return I;
+}
+
 }

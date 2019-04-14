@@ -133,7 +133,7 @@ void model::add_hole_square(pos p, double a, double dx)
 
 void model::display()
 {
-	window w(800,800);
+	window w(800, 800);
 	vector<float> posdata = export_vertex_data();
 	vector<GLuint> node_index = export_node_index();
 	vector<GLuint> edge_index = export_edge_index();
@@ -175,10 +175,9 @@ void model::display()
 		zoom = w.get_zoom();
 		glm::mat4 trans = glm::translate(glm::mat4(1.0f), glm::vec3(p.x, p.y, p.z));
 		glm::mat4 scale = glm::scale(glm::mat4(1.0), glm::vec3(zoom));
-		glm::mat4 mvp =  trans * scale;
+		glm::mat4 mvp = trans * scale;
 		prog.set_uniform("MVP", uniform_types::MAT4F, (void *)&mvp[0][0]);
 		prog.set_uniform("psize", uniform_types::FLOAT, (void *)&zoom);
-
 
 		glEnable(GL_PROGRAM_POINT_SIZE);
 		glEnable(GL_LINE_SMOOTH);
@@ -203,14 +202,14 @@ void model::display()
 
 			prog.update_uniforms();
 
-			ImGui::Begin("Stats",(bool*)false,mf); 
+			ImGui::Begin("Stats", (bool *)false, mf);
 			ImGui::Text(stats().c_str());
-			ImGui::SetWindowPos(ImVec2(0,0));
+			ImGui::SetWindowPos(ImVec2(0, 0));
 			ImGui::End();
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			
+
 			w.swap_buffers();
 			w.poll_events();
 		}
@@ -393,7 +392,65 @@ vector<uint32_t> model::export_edge_index() const
 
 string model::stats() const
 {
-	string stat = fmt::format("Number of nodes:{}\nNumber of edges:{}",number_of_nodes(),number_of_edges());
+	string stat = fmt::format("Number of nodes:{}\nNumber of edges:{}", number_of_nodes(), number_of_edges());
 	return stat;
 }
+
+void model::save(const string &filepath)
+{
+	if (number_of_nodes() != 0 && number_of_edges() != 0)
+	{
+		FILE *fout = fopen(filepath.c_str(), "wb");
+		fprintf(fout, "%llu %llu\n", number_of_nodes(), number_of_edges());
+		for (const node &n : N)
+			fprintf(fout, "%lf %lf %d\n", n.p.x, n.p.y, (int)n.location);
+		for (const edge &e : E)
+			fprintf(fout, "%llu %llu %d\n", e.start, e.end, (int)e.location);
+		fclose(fout);
+	}
+	else
+		printf("model is empty\n");
+}
+
+void model::load(const string &filepath)
+{
+	if (number_of_nodes() == 0 && number_of_edges() == 0)
+	{
+		FILE *fin = fopen(filepath.c_str(), "rb");
+		if (fin)
+		{
+			size_t nn, ne;
+			fscanf(fin, "%llu %llu\n", &nn, &ne);
+
+			N.reserve(nn);
+			E.reserve(ne);
+
+			for (size_t i = 0; i < nn; ++i)
+			{
+				double x, y;
+				int loc;
+				fscanf(fin, "%lf %lf %d\n", &x, &y, &loc);
+				N.push_back({{x, y, 0.0}, i, static_cast<__2d__::node_location>(loc)});
+			}
+
+			for (size_t i = 0; i < ne; ++i)
+			{
+				size_t start, end;
+				int loc;
+				fscanf(fin, "%llu %llu %d\n", &start, &end, &loc);
+				E.push_back({start, end, i, static_cast<__2d__::edge_location>(loc)});
+				N[E[i].start].BE.push_back(E[i].id);
+				N[E[i].end].BE.push_back(E[i].id);
+			}
+		}
+
+		else
+			printf("file not found\n");
+
+		fclose(fin);
+	}
+	else
+		printf("model is not empty\n");
+}
+
 } // namespace __2d__
