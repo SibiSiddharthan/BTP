@@ -335,7 +335,7 @@ bool is_collinear(const line &l, const pos &p)
 		return false;
 }
 
-bool is_collinear(const plane &p, const pos &x)
+bool is_coplanar(const plane &p, const pos &x)
 {
 	double volume = fabs((dot(cross(p.a - x, p.b - x), p.c - x))) / 6;
 	if (volume < epsilon)

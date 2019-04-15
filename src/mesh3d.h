@@ -49,7 +49,7 @@ class mesh
 
 	inline bool collinear_test(const plane &p, const node &n)
 	{
-		return !is_collinear({N[p.a].p, N[p.b].p, N[p.c].p, p.normal}, n.p);
+		return !is_coplanar({N[p.a].p, N[p.b].p, N[p.c].p, p.normal}, n.p);
 	}
 
 	inline bool intersection_test(const plane &p, const std::vector<plane> &P)
