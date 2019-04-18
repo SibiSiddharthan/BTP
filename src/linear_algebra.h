@@ -1,6 +1,19 @@
-#pragma once
+#ifndef LINAL_H
+#define LINAL_H
+/**
+ * @file linear_algebra.h
+ * @brief Implements a simple
+ * matrix operation framework
+ * @date 2019-04-17
+ * 
+ */
+
 #include "preprocess.h"
 
+/**
+ * @brief A square matrix
+ * 
+ */
 struct square_matrix
 {
 	std::vector<double> mat;
@@ -24,16 +37,54 @@ struct square_matrix
 	}
 };
 
+/**
+ * @brief Add operator overload
+ * 
+ * @return square_matrix 
+ */
 square_matrix operator+(square_matrix, square_matrix);
+
+/**
+ * @brief Subract operator overload
+ * 
+ * @return square_matrix 
+ */
 square_matrix operator-(square_matrix, square_matrix);
+
+/**
+ * @brief Multiply operator overload
+ * 
+ * @return square_matrix 
+ */
 square_matrix operator*(square_matrix, square_matrix);
 
+/**
+ * @brief Ostream operator overload
+ * 
+ * @return ostream 
+ */
 std::ostream &operator<<(std::ostream &, const square_matrix &);
+
+/**
+ * @brief Multiply with constant operator overload
+ * 
+ * @return square_matrix 
+ */
 square_matrix operator*(double, square_matrix);
+
+/**
+ * @brief Divide with constant operator overload
+ * 
+ * @return square_matrix 
+ */
 square_matrix operator/(square_matrix, double);
 
 void make_identity(square_matrix &);
 
+/**
+ * @brief A column vector
+ * 
+ */
 struct column_vector
 {
 	std::vector<double> vec;
@@ -57,10 +108,22 @@ struct column_vector
 	}
 };
 
+/**
+ * @brief Multiply with constant operator overload
+ * 
+ * @return square_matrix 
+ */
 column_vector operator*(square_matrix, column_vector);
 
+/**
+ * @brief Ostream operator overload
+ * 
+ * @return ostream 
+ */
 std::ostream &operator<<(std::ostream &, const column_vector &);
 
 square_matrix &rotation_xy(double);
 square_matrix &rotation_yz(double);
 square_matrix &rotation_zx(double);
+
+#endif
