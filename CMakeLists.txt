@@ -14,7 +14,7 @@ set(mesh_SOURCES
 	src/main.cpp src/model2d.cpp src/model3d.cpp src/geometry.cpp src/stl_reader.cpp
 	src/dxfreader.cpp src/linear_algebra.cpp src/window.cpp
 	src/mesh2d_debug.cpp src/mesh2d_display.cpp src/mesh2d_private src/mesh2d_public.cpp
-	src/mesh3d_display.cpp src/mesh3d_private )#src/mesh3d_public.cpp)
+	src/mesh3d_display.cpp src/mesh3d_private src/mesh3d_public.cpp src/mesh3d_debug.cpp) 
 
 if(CMAKE_BUILD_TYPE STREQUAL Release)
 	if(NOT MSVC)

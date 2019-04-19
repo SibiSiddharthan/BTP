@@ -143,6 +143,26 @@ class window
 	}
 
 	/**
+	 * @brief Get the x rotation of the model
+	 * 
+	 * @return float 
+	 */
+	inline float get_rotx()
+	{
+		return rotx;
+	}
+
+	/**
+	 * @brief Get the y rotation of the model
+	 * 
+	 * @return float 
+	 */
+	inline float get_roty()
+	{
+		return roty;
+	}
+
+	/**
 	 * @brief Abstraction for swapping window buffers
 	 * 
 	 */

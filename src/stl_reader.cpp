@@ -8,7 +8,7 @@ void read_stl(ifstream &in, const string filename, vector<plane> &planes)
 	in.open(filename, ios_base::in);
 	if (in)
 	{
-		cout << "file has been opened\n";
+		//cout << "file has been opened\n";
 		string file_string;
 		int i = 0;
 		plane p;

@@ -1,4 +1,4 @@
-#ifndef GL_ABASTACTION_HPP
+#ifndef GL_ABSTRACTION_HPP
 #define GL_ABSTRACTION_HPP
 
 /**
@@ -126,15 +126,15 @@ inline const color white = {1, 1, 1};
 /**
  * @brief String based color coding
  * 
- * Allowable values
- * black
- * red
- * green
- * blue
- * yellow
- * purple
- * turquoise
- * white
+ * Allowable values\n
+ * black\n
+ * red\n
+ * green\n
+ * blue\n
+ * yellow\n
+ * purple\n
+ * turquoise\n
+ * white\n
  * 
  * @param _color the color code
  * @return color 
@@ -264,7 +264,13 @@ class data_buffer
 		glGenBuffers(1, &id);
 		glBindBuffer(target, id);
 		size = data.size();
-		glBufferData(target, sizeof(T) * data.size(), &data[0], _usage);
+		if(size != 0)
+			glBufferData(target, sizeof(T) * data.size(), &data[0], _usage);
+		else
+		{
+			printf("A buffer is empty\n");
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	/**
@@ -326,7 +332,13 @@ class data_buffer
 		bind();
 		usage = _usage;
 		size = data.size();
-		glBufferData(target, sizeof(T) * data.size(), &data[0], _usage);
+		if(size != 0)
+			glBufferData(target, sizeof(T) * data.size(), &data[0], _usage);
+		else
+		{
+			printf("A buffer is empty\n");
+			exit(EXIT_FAILURE);
+		}
 		unbind();
 	}
 

@@ -15,6 +15,9 @@ window::window(int _width, int _height) : width{_width}, height{_height}
 	zoom = 1;
 	zoom_change = 1.1;
 	return_to_console = false;
+	rotx = 0;
+	roty = 0;
+	rotch = 0.02;
 
 	glfwInit();
 	_window = glfwCreateWindow(width, height, "MESH", NULL, NULL);

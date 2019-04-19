@@ -11,7 +11,7 @@ void mesh::import_3d(const model &M)
 	N = _N;
 	P = _P;
 }
-
+/*
 void mesh::refine_tetrahedrons()
 {
 	double avg = avg_volume_of_tetrahedrons();
@@ -160,7 +160,8 @@ void mesh::node_insertion_3d()
 }
 */
 
-void mesh::generate_mesh_basic_3d()
+
+void mesh::generate_mesh_basic()
 {
 	plane p1, p2, p3;
 	int64_t p_id;
@@ -177,7 +178,7 @@ void mesh::generate_mesh_basic_3d()
 			{
 				if (P[i].availability && N[j].availability && (P[i].a != N[j].id && P[i].b != N[j].id && P[i].c != N[j].id))
 				{
-					if (left_test(P[i], N[j]) && collinear_test(P[i], N[j]))
+					if (left_test(P[i], N[j]) && coplanar_test(P[i], N[j]))
 					{
 						//Have to check
 						p1.a = P[i].b;

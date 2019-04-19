@@ -12,6 +12,7 @@ int main()
 
 	//window W(800,800);
 
+	/*
 	model2d m,x;
 	m.add_boundary_circle(0.6,0.1);
 	m.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
@@ -24,6 +25,7 @@ int main()
 	mesh2d g;
 	g.import_2d(m);
 	g.generate_interactive();
+	*/
 	//g.generate_mesh_basic();
 	//g.save("save1.dat");
 	//y.load("save1.dat");
@@ -39,15 +41,16 @@ int main()
 	//g.load("./tests/save1.dat");
 	//g.display();
 	
-	/*
-	_3D_ surf;
-	surf.attach_window(window);
-	surf.stl_read("tests/sphere1.stl");
-	surf.display();
-
-
-	*/
 	
+	model3d surf;
+	surf.stl_read("tests/sphere0.stl");
+	//surf.display();
+	mesh3d m;
+	m.import_3d(surf);
+	//m.generate_mesh_basic_debug();
+	m.generate_mesh_basic();
+	m.display();
+
 
 	return 0;
 }
