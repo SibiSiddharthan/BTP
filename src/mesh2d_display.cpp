@@ -229,15 +229,15 @@ void mesh::generate_interactive()
 	bool need_to_update = true;
 	ImGuiIO &io = ImGui::GetIO();
 	
-	unordered_map<string,void(mesh::*)(void)> command_map;
-	command_map.insert(make_pair("1",generate_mesh_basic));
-	command_map.insert(make_pair("2",node_insertion));
-	command_map.insert(make_pair("3",refine_triangles));
-	command_map.insert(make_pair("4",edge_swap));
-	command_map.insert(make_pair("5",refine_triangles_near_bound));
-	command_map.insert(make_pair("6",refine_triangles_near_hole));
-	command_map.insert(make_pair("7",centroid_shift));
-	command_map.insert(make_pair("8",generate_mesh_full));
+	unordered_set<string> command_map;
+	command_map.insert("1");
+	command_map.insert("2");
+	command_map.insert("3");
+	command_map.insert("4");
+	command_map.insert("5");
+	command_map.insert("6");
+	command_map.insert("7");
+	command_map.insert("8");
 
 	pos p;
 	float zoom;
@@ -378,7 +378,19 @@ void mesh::generate_interactive()
 			
 			if (command_map.find(s)!=command_map.end())
 			{
-				(this->*command_map[s])();
+				int temp = stoi(s);
+				switch (temp)
+				{
+					case 1:generate_mesh_basic();break;
+					case 2:node_insertion();break;
+					case 3:refine_triangles();break;
+					case 4:edge_swap();break;
+					case 5:refine_triangles_near_boundary(node_location::boundary);break;
+					case 6:refine_triangles_near_boundary(node_location::hole);break;
+					case 7:centroid_shift();break;
+					case 8:generate_mesh_full();break;
+					default:break;
+				}
 				need_to_update = true;
 				err_message = false;
 			}
@@ -405,7 +417,6 @@ void mesh::display_node(const vector<node> &m_N)
 	vector<color> node_color;
 	vector<float> node_size;
 	vector<float> posdata = export_vertex_data();
-	uint64_t k = 0;
 	
 	for (size_t i = 0; i < m_N.size(); ++i)
 	{

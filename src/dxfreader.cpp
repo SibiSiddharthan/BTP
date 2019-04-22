@@ -135,7 +135,7 @@ void interpret_data(vector<line> &l, vector<string> &d, double dx)
 	pos p1, p2, centre;
 	double radius, start_angle, end_angle;
 
-	for (int i = 0; i < d.size(); i++)
+	for (size_t i = 0; i < d.size(); i++)
 	{
 		if (d[i] == "LINE")
 		{
@@ -322,21 +322,21 @@ void resize_data(vector<line> &l)
 
 	/*Shift the origin to the centroid of the figure*/
 	pos centroid = {};
-	for (int i = 0; i < l.size(); i++)
+	for (size_t i = 0; i < l.size(); i++)
 	{
 		centroid = centroid + ((l[i].start + l[i].end) * 0.5);
 	}
 
 	centroid = centroid / l.size();
 
-	for (int i = 0; i < l.size(); i++)
+	for (size_t i = 0; i < l.size(); i++)
 	{
 		l[i].start = l[i].start - centroid;
 		l[i].end = l[i].end - centroid;
 	}
 
 	/*Resize the figure to fit in the window*/
-	for (int i = 0; i < l.size(); i++)
+	for (size_t i = 0; i < l.size(); i++)
 	{
 		temp1 = distance(l[i].start, {0, 0, 0});
 		temp2 = distance(l[i].end, {0, 0, 0});
@@ -348,7 +348,7 @@ void resize_data(vector<line> &l)
 
 	if (max_dist > 1)
 	{
-		for (int i = 0; i < l.size(); i++)
+		for (size_t i = 0; i < l.size(); i++)
 		{
 			l[i].start = l[i].start * 0.8 / max_dist;
 			l[i].end = l[i].end * 0.8 / max_dist;

@@ -40,7 +40,7 @@ endif()
 
 target_compile_definitions(mesh PRIVATE GLEW_STATIC MESH_DEBUG)
 target_include_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_compile_options(mesh PUBLIC -fdiagnostics-color=always)
+target_compile_options(mesh PUBLIC -fdiagnostics-color=always -Wall)
 target_link_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 add_custom_command(TARGET mesh POST_BUILD 
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${EXECUTABLE} ${CMAKE_SOURCE_DIR})

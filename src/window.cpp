@@ -31,7 +31,6 @@ window::window(int _width, int _height) : width{_width}, height{_height}
 	glfwMakeContextCurrent(_window);
 	glewInit();
 	ImGui::CreateContext();
-	ImGuiIO &io = ImGui::GetIO();
 
 	ImGui_ImplGlfw_InitForOpenGL(_window, true);
 	ImGui_ImplOpenGL3_Init();

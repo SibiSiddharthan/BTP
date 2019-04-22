@@ -329,7 +329,6 @@ void mesh::display_nodes(const vector<node> &m_N)
 	vector<GLuint> node_index(m_N.size());
 	vector<color> node_color;
 	vector<float> posdata = export_vertex_data();
-	uint64_t k = 0;
 
 	for (size_t i = 0; i < m_N.size(); ++i)
 	{

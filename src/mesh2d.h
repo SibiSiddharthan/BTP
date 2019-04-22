@@ -454,22 +454,6 @@ class mesh
 	void refine_triangles_near_boundary(node_location);
 
 	/**
-	 * @brief Forwarding funtion for refine_triangles_near_boundary(boundary)
-	 */
-	void inline refine_triangles_near_bound()
-	{
-		refine_triangles_near_boundary(__2d__::node_location::boundary);
-	}
-
-	/**
-	 * @brief Forwarding funtion for refine_triangles_near_boundary(hole)
-	 */
-	void inline refine_triangles_near_hole()
-	{
-		refine_triangles_near_boundary(__2d__::node_location::hole);
-	}
-
-	/**
 	 * @brief Swaps the edge of 2 adjacent triangles
 	 * if the minimum angle of both the triangles increases after swapping
 	 */
