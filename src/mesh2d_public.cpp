@@ -460,4 +460,9 @@ void mesh::load(const std::string &filepath)
 		printf("mesh is not empty\n");
 }
 
+tuple<vector<node>,vector<edge>,vector<triangle>> mesh::export_mesh() const
+{
+	return make_tuple(N,E,T);
+}
+
 } // namespace __2d__

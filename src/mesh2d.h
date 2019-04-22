@@ -521,6 +521,13 @@ class mesh
 	 * @param filepath 
 	 */
 	void load(const std::string& filepath);
+
+	/**
+	 * @brief Exports the mesh to the solver class
+	 * 
+	 * @return std::tuple<std::vector<node>,std::vector<edge>,std::vector<triangle>> 
+	 */
+	std::tuple<std::vector<node>,std::vector<edge>,std::vector<triangle>> export_mesh() const;
 };
 
 } // namespace __mesh2d__

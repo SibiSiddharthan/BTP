@@ -11,7 +11,7 @@
  * 
  */
 #include "preprocess.h"
-
+#include <fmt/format.h>
 /**
  * @struct pos
  * @brief A point in 3d space
@@ -45,15 +45,13 @@ struct pos
 
 	inline double norm()
 	{
-		return sqrt(x*x + y*y + z*z);
+		return sqrt(x * x + y * y + z * z);
 	}
-	
 };
-
 
 namespace std
 {
-template<>
+template <>
 /**
  * @struct hash<pos>
  * @brief A custom hash function for pos inside
@@ -65,10 +63,10 @@ struct hash<pos>
 	inline std::size_t operator()(const pos &p) const
 	{
 		using std::hash;
-		return (((hash<double>()(p.x) ^ hash<double>()(p.y) << 1 ) >> 1) ^ (hash<double>()(p.z) << 1));
+		return (((hash<double>()(p.x) ^ hash<double>()(p.y) << 1) >> 1) ^ (hash<double>()(p.z) << 1));
 	}
 };
-}
+} // namespace std
 
 //operators;
 /**
@@ -227,5 +225,25 @@ inline std::ostream &operator<<(std::ostream &out, const pos p)
 	out << "x: " << p.x << " y: " << p.y << " z: " << p.z << std::endl;
 	return out;
 }
+
+namespace fmt
+{
+
+template <>
+/**
+ * @brief fmt formater for pos
+ */
+struct formatter<pos>
+{
+	template <typename ParseContext>
+	constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
+
+	template <typename FormatContext>
+	auto format(const pos &p, FormatContext &ctx)
+	{
+		return format_to(ctx.out(), "x:{:.3f} y:{:.3f} z:{:.3f}", p.x, p.y,p.z);
+	}
+};
+} // namespace fmt
 
 #endif
