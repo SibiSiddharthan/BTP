@@ -1,5 +1,6 @@
 #include "mesh2d.h"
 #include "gl_abstraction.h"
+#include <thread>
 /*
 This file contains the definitions of display functions used class mesh
 */
@@ -128,7 +129,6 @@ void mesh::display()
 	}
 }
 
-
 void mesh::display_internal(window &w)
 {
 	vector<float> posdata = export_vertex_data();
@@ -222,13 +222,15 @@ void mesh::display_internal(window &w)
 	prog.update_uniforms();
 }
 
-
 void mesh::generate_interactive()
 {
 	window w(800, 800);
-	bool need_to_update = true;
+	bool need_to_update = true,op_completed = false,mesh_op = false;
 	ImGuiIO &io = ImGui::GetIO();
-	
+	thread t;
+	auto op_start = chrono::high_resolution_clock::now();
+	auto op_end = chrono::high_resolution_clock::now();
+	chrono::duration<double> time_taken;
 	unordered_set<string> command_map;
 	command_map.insert("1");
 	command_map.insert("2");
@@ -278,7 +280,7 @@ void mesh::generate_interactive()
 	glEnable(GL_PROGRAM_POINT_SIZE);
 	glEnable(GL_LINE_SMOOTH);
 
-	char text_input[256];
+	char text_input[256] = {};
 	bool err_message = false;
 	while (!w.should_close())
 	{
@@ -365,41 +367,77 @@ void mesh::generate_interactive()
 					"2:node insertion\n"
 					"3:equalize triangles\n"
 					"4:edge swap\n"
-			  		"5:equalize triangles near boundary\n"
+					"5:equalize triangles near boundary\n"
 					"6:equalize triangles near hole\n"
 					"7:node shift\n"
 					"8:auto generate\n"
 					/*"9:generate ghost triangles\n"*/);
 		//ImGui::SetWindowPos(ImVec2(0, 0));
-		
+
 		if (ImGui::InputText("Input", text_input, IM_ARRAYSIZE(text_input), ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			string s = text_input;
-			
-			if (command_map.find(s)!=command_map.end())
+
+			if (command_map.find(s) != command_map.end())
 			{
+				op_start = chrono::high_resolution_clock::now();
 				int temp = stoi(s);
+
 				switch (temp)
 				{
-					case 1:generate_mesh_basic();break;
-					case 2:node_insertion();break;
-					case 3:refine_triangles();break;
-					case 4:edge_swap();break;
-					case 5:refine_triangles_near_boundary(node_location::boundary);break;
-					case 6:refine_triangles_near_boundary(node_location::hole);break;
-					case 7:centroid_shift();break;
-					case 8:generate_mesh_full();break;
-					default:break;
+				case 1:
+					t = thread([this,&mesh_op]{generate_mesh_basic();mesh_op = true;});
+					break;
+				case 2:
+					t = thread([this,&mesh_op]{node_insertion();mesh_op = true;});
+					break;
+				case 3:
+					t = thread([this,&mesh_op]{refine_triangles();mesh_op = true;});
+					break;
+				case 4:
+					t = thread([this,&mesh_op]{edge_swap();mesh_op = true;});
+					break;
+				case 5:
+					t = thread([this,&mesh_op]{refine_triangles_near_boundary(node_location::boundary);mesh_op = true;});
+					break;
+				case 6:
+					t = thread([this,&mesh_op]{refine_triangles_near_boundary(node_location::hole);mesh_op = true;});
+					break;
+				case 7:
+					t = thread([this,&mesh_op]{centroid_shift();mesh_op = true;});
+					break;
+				case 8:
+					t = thread([this,&mesh_op]{generate_mesh_full();mesh_op = true;});
+					break;
+				default:
+					break;
 				}
-				need_to_update = true;
+
 				err_message = false;
 			}
 
 			else
-				err_message=true;				
+				err_message = true;
 		}
-		if(err_message)
+
+		
+		if (err_message)
 			ImGui::Text("Command not available\n");
+
+		if(mesh_op)
+		{
+			need_to_update = true;
+			t.join();
+			op_end = chrono::high_resolution_clock::now();
+			time_taken = op_end - op_start;
+			mesh_op = false;
+			op_completed = true;
+		}
+
+		if(op_completed)
+		{
+			ImGui::Text("Time Taken %lf\n",time_taken.count());
+		}
 		ImGui::End();
 
 		ImGui::Render();
@@ -417,7 +455,7 @@ void mesh::display_node(const vector<node> &m_N)
 	vector<color> node_color;
 	vector<float> node_size;
 	vector<float> posdata = export_vertex_data();
-	
+
 	for (size_t i = 0; i < m_N.size(); ++i)
 	{
 		node_index[i] = GLuint(m_N[i].id);

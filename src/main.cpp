@@ -11,22 +11,19 @@ using namespace std;
 int main()
 {
 
-	//window W(800,800);
-
-	
-	//model2d m,x;
-	//m.add_boundary_circle(0.6,0.1);
-	//m.add_boundary_square(1.0,0.1);
-	//m.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
-	//m.add_hole_circle({ -0.2,0.2 }, 0.1, 0.2);
-	//m.add_hole_circle({ 0.2,-0.2 }, 0.1, 0.2);
-	//m.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);
+	model2d x;
+	x.add_boundary_square(1.0,0.01);
+	//x.add_boundary_circle(0.6,0.1);
+	//x.add_hole_circle({ 0.2,0.2 }, 0.1, 0.2 );
+	//x.add_hole_circle({ -0.2,0.2 }, 0.1, 0.2);
+	//x.add_hole_circle({ 0.2,-0.2 }, 0.1, 0.2);
+	//x.add_hole_circle({ -0.2,-0.2 }, 0.1, 0.2);
 	//m.save("2dout.dat");
 	//x.load("2dout.dat");
 	//x.display();
-	//mesh2d g;
-	//g.import_2d(m);
-	//g.generate_interactive();
+	mesh2d g;
+	g.import_2d(x);
+	g.generate_interactive();
 	
 	//g.generate_mesh_basic();
 	//y.load("save1.dat");
