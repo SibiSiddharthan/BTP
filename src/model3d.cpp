@@ -1,6 +1,9 @@
 #include "model3d.h"
 #include "stl_reader.h"
 #include "gl_abstraction.h"
+#include "model2d.h"
+#include "mesh2d.h"
+
 using namespace std;
 
 namespace __3d__
@@ -48,14 +51,13 @@ void model::display()
 	vector<color> plane_color(number_of_nodes(), colors("yellow"));
 	vector<GLuint> plane_edge_index = export_plane_edge_index();
 	vector<color> plane_edge_color(number_of_nodes(), colors("red"));
-	auto [normalpos,normals] = export_normals();
+	auto [normalpos, normals] = export_normals();
 	vector<color> normal_color(2 * number_of_planes(), colors("blue"));
 
 	bool draw_normals = false;
 	ImGuiIO &io = ImGui::GetIO();
 	pos p;
 	float rotx, roty;
-	
 
 	data_buffer vb_pos(GL_ARRAY_BUFFER, posdata);
 	vb_pos.configure_layout(1, 3, 3, GL_FLOAT);
@@ -225,7 +227,379 @@ tuple<vector<float>, vector<uint32_t>> model::export_normals() const
 		I[int((i + 5) / 3)] = uint32_t((i + 5) / 3);
 	}
 
-	return make_tuple(NPOS,I);
+	return make_tuple(NPOS, I);
+}
+
+void model::add_boundary_sphere(double radius, double dx)
+{
+	__2d__::model circle;
+	circle.add_boundary_circle(radius, dx);
+	__2d__::mesh mesh_circle;
+	mesh_circle.import_2d(circle);
+	mesh_circle.generate_mesh_full();
+
+	auto [_N, __, _T] = mesh_circle.export_mesh();
+
+	unordered_map<node_id, node_id> top, bottom;
+
+	//z = 0 plane
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::boundary)
+		{
+			N.push_back({n.p, N.size(), __3d__::node_location::boundary});
+			top.insert({n.id, N.back().id});
+			bottom.insert({n.id, N.back().id});
+		}
+
+	//Top and bottom hemisphere
+	for (__2d__::node n : _N)
+		if (n.location == __2d__::node_location::inside)
+		{
+			//Top
+			n.p.z = sqrt(radius * radius - (n.p.x * n.p.x + n.p.y * n.p.y));
+			N.push_back({n.p, N.size(), __3d__::node_location::boundary});
+			top.insert({n.id, N.back().id});
+
+			//Bottom
+			n.p.z = -sqrt(radius * radius - (n.p.x * n.p.x + n.p.y * n.p.y));
+			N.push_back({n.p, N.size(), __3d__::node_location::boundary});
+			bottom.insert({n.id, N.back().id});
+		}
+
+	for (const auto &t : _T)
+	{
+		pos p1, p2, p3;
+		p1 = _N[t.a].p;
+		p2 = _N[t.b].p;
+		p3 = _N[t.c].p;
+		if (left_test_2d({p1, p2}, p3))
+		{
+			P.push_back({top[t.a], top[t.b], top[t.c], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+
+			P.push_back({bottom[t.a], bottom[t.c], bottom[t.b], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+		}
+
+		else
+		{
+			P.push_back({top[t.a], top[t.c], top[t.b], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+
+			P.push_back({bottom[t.a], bottom[t.b], bottom[t.c], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+		}
+	}
+}
+
+void model::add_hole_sphere(pos centre, double radius, double dx)
+{
+	__2d__::model circle;
+	circle.add_boundary_circle(radius, dx);
+	__2d__::mesh mesh_circle;
+	mesh_circle.import_2d(circle);
+	mesh_circle.generate_mesh_full();
+
+	auto [_N, __, _T] = mesh_circle.export_mesh();
+
+	unordered_map<node_id, node_id> top, bottom;
+
+	//z = 0 plane
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::boundary)
+		{
+			N.push_back({n.p + centre, N.size(), __3d__::node_location::boundary});
+			top.insert({n.id, N.back().id});
+			bottom.insert({n.id, N.back().id});
+		}
+
+	//Top and bottom hemisphere
+	for (__2d__::node n : _N)
+		if (n.location == __2d__::node_location::inside)
+		{
+			//Top
+			n.p.z = sqrt(radius * radius - (n.p.x * n.p.x + n.p.y * n.p.y));
+			N.push_back({n.p + centre, N.size(), __3d__::node_location::boundary});
+			top.insert({n.id, N.back().id});
+
+			//Bottom
+			n.p.z = -sqrt(radius * radius - (n.p.x * n.p.x + n.p.y * n.p.y));
+			N.push_back({n.p + centre, N.size(), __3d__::node_location::boundary});
+			bottom.insert({n.id, N.back().id});
+		}
+
+	for (const auto &t : _T)
+	{
+		pos p1, p2, p3;
+		p1 = _N[t.a].p;
+		p2 = _N[t.b].p;
+		p3 = _N[t.c].p;
+		if (!left_test_2d({p1, p2}, p3))
+		{
+			P.push_back({top[t.a], top[t.b], top[t.c], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+
+			P.push_back({bottom[t.a], bottom[t.c], bottom[t.b], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+		}
+
+		else
+		{
+			P.push_back({top[t.a], top[t.c], top[t.b], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+
+			P.push_back({bottom[t.a], bottom[t.b], bottom[t.c], P.size(), __3d__::plane_location::boundary});
+			P.back().normal = cross(N[P.back().a].p - N[P.back().c].p, N[P.back().b].p - N[P.back().c].p);
+			P.back().normal /= P.back().normal.norm();
+		}
+	}
+}
+
+void model::add_boundary_cube(double length, double dx)
+{
+	__2d__::model square;
+	square.add_boundary_square(length, dx);
+	__2d__::mesh mesh_square;
+	mesh_square.import_2d(square);
+	mesh_square.generate_mesh_full();
+
+	auto [_N, __, _T] = mesh_square.export_mesh();
+
+	unordered_map<pos, node_id> um;
+	unordered_map<node_id, node_id> top, bottom, front, back, left, right;
+
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::boundary)
+		{
+			pos temp;
+			//front
+			temp = n.p + pos(0, 0, length * 0.5);
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			front[n.id] = um[temp];
+			
+			//back
+			temp = n.p + pos(0, 0, -length * 0.5);
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			back[n.id] = um[temp];
+			
+
+			//left
+			temp = {-length * 0.5, n.p.y, n.p.x};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			left[n.id] = um[temp];
+
+			//right
+			temp = {length * 0.5, n.p.y, -n.p.x};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			right[n.id] = um[temp];
+
+			//top
+			temp = {n.p.x, length * 0.5, -n.p.y};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			top[n.id] = um[temp];
+
+			//bottom
+			temp = {n.p.x, -length * 0.5, n.p.y};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			bottom[n.id] = um[temp];
+		}
+
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::inside)
+		{
+			pos temp;
+			//front
+			temp = n.p + pos(0, 0, length * 0.5);
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			front[n.id] = N.back().id;
+			
+			//back
+			temp = n.p + pos(0, 0, length * -0.5);
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			back[n.id] = N.back().id;
+
+			//left
+			temp = {-length * 0.5, n.p.y, n.p.x};
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			left[n.id] = N.back().id;
+
+			//right
+			temp = {length * 0.5, n.p.y, -n.p.x};
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			right[n.id] = N.back().id;
+
+			//top
+			temp = {n.p.x, length * 0.5, -n.p.y};
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			top[n.id] = N.back().id;
+
+			//bottom
+			temp = {n.p.x, -length * 0.5, n.p.y};
+			N.push_back({temp, N.size(), __3d__::node_location::boundary});
+			bottom[n.id] = N.back().id;
+		}
+
+	
+	for (const auto &t : _T)
+	{
+		P.push_back({front[t.a], front[t.b], front[t.c], {0, 0, 1.0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({back[t.a], back[t.b], back[t.c], {0, 0, -1.0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({left[t.a], left[t.b], left[t.c], {-1.0, 0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({right[t.a], right[t.b], right[t.c], {1.0, 0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({top[t.a], top[t.b], top[t.c], {0, 1.0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({bottom[t.a], bottom[t.b], bottom[t.c], {0, -1.0, 0}, P.size(), __3d__::plane_location::boundary});
+	}
+}
+
+void model::add_hole_cube(pos centre, double length, double dx)
+{
+	__2d__::model square;
+	square.add_boundary_square(length, dx);
+	__2d__::mesh mesh_square;
+	mesh_square.import_2d(square);
+	mesh_square.generate_mesh_full();
+
+	auto [_N, __, _T] = mesh_square.export_mesh();
+
+	unordered_map<pos, node_id> um;
+	unordered_map<node_id, node_id> top, bottom, front, back, left, right;
+
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::boundary)
+		{
+			pos temp;
+			//front
+			temp = n.p + pos(0, 0, length * 0.5);
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			front[n.id] = um[temp];
+			
+			//back
+			temp = n.p + pos(0, 0, -length * 0.5);
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			back[n.id] = um[temp];
+			
+
+			//left
+			temp = {-length * 0.5, n.p.y, n.p.x};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			left[n.id] = um[temp];
+
+			//right
+			temp = {length * 0.5, n.p.y, -n.p.x};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			right[n.id] = um[temp];
+
+			//top
+			temp = {n.p.x, length * 0.5, -n.p.y};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			top[n.id] = um[temp];
+
+			//bottom
+			temp = {n.p.x, -length * 0.5, n.p.y};
+			if (um.find(temp) == um.end())
+			{
+				N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+				um[temp] = N.back().id;
+			}
+			bottom[n.id] = um[temp];
+		}
+
+	for (const __2d__::node &n : _N)
+		if (n.location == __2d__::node_location::inside)
+		{
+			pos temp;
+			//front
+			temp = n.p + pos(0, 0, length * 0.5);
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			front[n.id] = N.back().id;
+			
+			//back
+			temp = n.p + pos(0, 0, length * -0.5);
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			back[n.id] = N.back().id;
+
+			//left
+			temp = {-length * 0.5, n.p.y, n.p.x};
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			left[n.id] = N.back().id;
+
+			//right
+			temp = {length * 0.5, n.p.y, -n.p.x};
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			right[n.id] = N.back().id;
+
+			//top
+			temp = {n.p.x, length * 0.5, -n.p.y};
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			top[n.id] = N.back().id;
+
+			//bottom
+			temp = {n.p.x, -length * 0.5, n.p.y};
+			N.push_back({temp + centre, N.size(), __3d__::node_location::boundary});
+			bottom[n.id] = N.back().id;
+		}
+
+	
+	for (const auto &t : _T)
+	{
+		P.push_back({front[t.a], front[t.b], front[t.c], {0, 0, -1.0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({back[t.a], back[t.b], back[t.c], {0, 0, 1.0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({left[t.a], left[t.b], left[t.c], {1.0, 0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({right[t.a], right[t.b], right[t.c], {-1.0, 0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({top[t.a], top[t.b], top[t.c], {0, -1.0, 0}, P.size(), __3d__::plane_location::boundary});
+		P.push_back({bottom[t.a], bottom[t.b], bottom[t.c], {0, 1.0, 0}, P.size(), __3d__::plane_location::boundary});
+	}
 }
 
 } // namespace __3d__

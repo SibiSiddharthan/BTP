@@ -267,7 +267,7 @@ void mesh::edge_swap()
 					fabs(area_new_1 + area_new_2 - (area_old_1 + area_old_2)) < epsilon)
 				{
 
-					edge_id edge_to_be_updated_0, edge_to_be_updated_1;
+					edge_id edge_to_be_updated_0 = 0, edge_to_be_updated_1 = 0;
 					for (const edge_id e_id : T[m_e.T[0]].E)
 					{
 						if (m_e.id != e_id && (E[e_id].start == m_e.start || E[e_id].end == m_e.start))
@@ -321,6 +321,8 @@ void mesh::edge_swap()
 	} while (flag != 0);
 	node_triangle_share_sweep();
 	node_edge_share_sweep();
+	edge_triangle_share_sweep();
+	triangle_edge_share_sweep();
 }
 
 //updated on 23/8/18
@@ -395,11 +397,36 @@ void mesh::save(const std::string &filepath)
 		FILE *fout = fopen(filepath.c_str(), "wb");
 		fprintf(fout, "%llu %llu %llu\n", number_of_nodes(), number_of_edges(), number_of_triangles());
 		for (const node &n : N)
+		{
 			fprintf(fout, "%lf %lf %d\n", n.p.x, n.p.y, (int)n.location);
+			fprintf(fout, "%llu",n.T.size());//no space
+			for(const triangle_id t_id : n.T)
+				fprintf(fout," %llu",t_id);
+			fprintf(fout,"\n");
+			fprintf(fout,"%llu",n.IE.size());//no space
+			for(const edge_id e_id : n.IE)
+				fprintf(fout," %llu",e_id);
+			fprintf(fout,"\n");
+		}
+
 		for (const edge &e : E)
+		{	
 			fprintf(fout, "%llu %llu %d %d\n", e.start, e.end, (int)e.location,(int)e.availability);
+			fprintf(fout, "%llu",e.T.size());//no space
+			for(const triangle_id t_id : e.T)
+				fprintf(fout," %llu",t_id);
+			fprintf(fout,"\n");
+		}
+
 		for (const triangle &t : T)
-			fprintf(fout, "%llu %llu %d\n", t.a, t.b, t.c, (int)t.type);
+		{
+			fprintf(fout, "%llu %llu %llu %d\n", t.a, t.b, t.c, (int)t.type);
+			fprintf(fout, "%llu",t.E.size());//no space
+			for(const edge_id e_id : t.E)
+				fprintf(fout," %llu",e_id);
+			fprintf(fout,"\n");
+		}
+		
 		fclose(fout);
 	}
 	else
@@ -426,6 +453,28 @@ void mesh::load(const std::string &filepath)
 				int loc;
 				fscanf(fin, "%lf %lf %d\n", &x, &y, &loc);
 				N.push_back({{x, y, 0.0}, i, static_cast<__2d__::node_location>(loc)});
+				size_t nt,ne;
+				fscanf(fin, "%llu",&nt);
+				N.back().T.reserve(nt);
+
+				for(size_t j = 0; j<nt;++j)
+				{
+					triangle_id t_id;
+					fscanf(fin, " %llu",&t_id);
+					N.back().T[j] = t_id;
+				}
+				fscanf(fin,"\n");
+
+				fscanf(fin,"%llu",&ne);
+				N.back().IE.reserve(ne);
+				
+				for(size_t j = 0; j<ne;++j)
+				{
+					edge_id e_id;
+					fscanf(fin, " %llu",&e_id);
+					N.back().IE[j] = e_id;
+				}
+				fscanf(fin,"\n");
 			}
 
 			for (size_t i = 0; i < ne; ++i)
@@ -436,6 +485,16 @@ void mesh::load(const std::string &filepath)
 				E.push_back({start, end, i, static_cast<__2d__::edge_location>(loc),static_cast<bool>(availabilty)});
 				N[E[i].start].BE.push_back(E[i].id);
 				N[E[i].end].BE.push_back(E[i].id);
+				
+				size_t nt;
+				fscanf(fin, "%llu",&nt);
+				for(size_t j = 0; j<nt;++j)
+				{
+					triangle_id t_id;
+					fscanf(fin, " %llu",&t_id);
+					E.back().T.push_back(t_id);
+				}
+				fscanf(fin,"\n");
 			}
 
 			for (size_t i = 0; i < nt; ++i)
@@ -444,11 +503,21 @@ void mesh::load(const std::string &filepath)
 				int type;
 				fscanf(fin, "%llu %llu %llu %d\n", &a, &b, &c, &type);
 				T.push_back({a, b, c, i, static_cast<__2d__::triangle_type>(type)});
+
+				size_t ne;
+				fscanf(fin, "%llu",&ne);
+				for(size_t j = 0; j<ne;++j)
+				{
+					edge_id e_id;
+					fscanf(fin, " %llu",&e_id);
+					T.back().E.push_back(e_id);
+				}
+				fscanf(fin,"\n");
 			}
 
-			node_triangle_share_sweep();
-			node_edge_share_sweep();
-			triangle_edge_share_sweep();
+			//node_triangle_share_sweep();
+			//node_edge_share_sweep();
+			//triangle_edge_share_sweep();
 		}
 
 		else

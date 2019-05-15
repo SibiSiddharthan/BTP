@@ -34,8 +34,8 @@ class mesh
 	pos generate_centroid(const std::vector<node> &);
 
 	//3D
-	void make_inside_plane(const node_id, const node_id, const node_id, bool);
-	void make_tetrahedron(const node_id, const node_id, const node_id, const node_id, tetrahedron_type = tetrahedron_type::domain);
+	void make_inside_plane(const node_id a, const node_id b, const node_id c, bool availability, const node_id check);
+	void make_tetrahedron(const node_id a, const node_id b, const node_id c, const node_id d, tetrahedron_type tp = tetrahedron_type::domain);
 
 	inline const uint64_t number_of_planes()
 	{

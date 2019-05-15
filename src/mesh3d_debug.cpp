@@ -13,6 +13,10 @@ void mesh::generate_mesh_basic_debug()
 {
 	window w(800, 800);
 	bool debug = true, step = false;
+	bool break1 = true;
+	bool break2 = true;
+	bool break3 = true;
+	bool break4 = true;
 	pos p;
 	float rotx, roty;
 	bool draw_normals = false;
@@ -47,7 +51,7 @@ void mesh::generate_mesh_basic_debug()
 				{
 					if (P[i].availability && N[j].availability && (P[i].a != N[j].id && P[i].b != N[j].id && P[i].c != N[j].id))
 					{
-						if (debug)
+						if (debug && break1)
 						{
 							step = false;
 							bool display_state = true;
@@ -90,6 +94,10 @@ void mesh::generate_mesh_basic_debug()
 									debug = false;
 									step = true;
 								}
+								ImGui::Checkbox("BreakPoint basic tests", &break1);
+								ImGui::Checkbox("BreakPoint intersection test", &break2);
+								ImGui::Checkbox("BreakPoint pre form", &break3);
+								ImGui::Checkbox("BreakPoint post form", &break4);
 								ImGui::Checkbox("display state", &display_state);
 								ImGui::Checkbox("draw_normals", &draw_normals);
 								ImGui::SetWindowPos(ImVec2(0, 0));
@@ -124,7 +132,7 @@ void mesh::generate_mesh_basic_debug()
 							p3.b = N[j].id;
 							p3.c = P[i].a;
 
-							if (debug)
+							if (debug && break2)
 							{
 								step = false;
 								bool display_state = true;
@@ -158,11 +166,11 @@ void mesh::generate_mesh_basic_debug()
 									display_planes({P[i]}, draw_normals);
 
 									if (display_p1)
-										display_planes({p1}, draw_normals,colors("green"));
+										display_planes({p1}, draw_normals, colors("green"));
 									if (display_p2)
-										display_planes({p2}, draw_normals,colors("green"));
+										display_planes({p2}, draw_normals, colors("green"));
 									if (display_p3)
-										display_planes({p3}, draw_normals,colors("green"));
+										display_planes({p3}, draw_normals, colors("green"));
 
 									ImGui::Begin("button");
 									if (ImGui::Button("step"))
@@ -175,6 +183,10 @@ void mesh::generate_mesh_basic_debug()
 										debug = false;
 										step = true;
 									}
+									ImGui::Checkbox("BreakPoint basic tests", &break1);
+									ImGui::Checkbox("BreakPoint intersection test", &break2);
+									ImGui::Checkbox("BreakPoint pre form", &break3);
+									ImGui::Checkbox("BreakPoint post form", &break4);
 									ImGui::Checkbox("display state", &display_state);
 									ImGui::Checkbox("draw_normals", &draw_normals);
 									ImGui::Checkbox("p1", &display_p1);
@@ -194,7 +206,7 @@ void mesh::generate_mesh_basic_debug()
 									}
 								}
 							}
-							
+
 							if (intersection_test(p1, P) && intersection_test(p2, P) && intersection_test(p3, P))
 							{
 								temp = distance((N[P[i].a].p + N[P[i].b].p + N[P[i].c].p) * 0.333, N[j].p);
@@ -204,24 +216,28 @@ void mesh::generate_mesh_basic_debug()
 									min_dist = temp;
 								}
 							}
-							
 						}
 					}
 				}
 
 				if (P[i].availability && k > -1)
 				{
-					if (debug)
+					if (debug && break3)
 					{
 						step = false;
-
+						string status = fmt::format("Node a\n id {} pos {}\n"
+													"Node b\n id {} pos {}\n"
+													"Node c\n id {} pos {}\n"
+													"Node d\n id {} pos {}",
+													P[i].a, N[P[i].a].p, P[i].b, N[P[i].b].p, P[i].c, N[P[i].c].p, N[k].id, N[k].p);
+						bool display_state = true;
 						while (!step)
 						{
 							ImGui_ImplOpenGL3_NewFrame();
 							ImGui_ImplGlfw_NewFrame();
 							ImGui::NewFrame();
 
-							glClear(GL_COLOR_BUFFER_BIT );
+							glClear(GL_COLOR_BUFFER_BIT);
 
 							p = w.get_pos();
 							rotx = w.get_rotx();
@@ -231,9 +247,10 @@ void mesh::generate_mesh_basic_debug()
 							View = glm::rotate(ViewRotateX, roty, glm::vec3(0.0f, 1.0f, 0.0f));
 
 							prog.update_uniforms();
-							display_internal(w, draw_normals);
-							//display_node({N[k], N[E[i].start], N[E[i].end]});
-							//display_edge({E[i]});
+							if (display_state)
+								display_internal(w, draw_normals);
+							display_nodes({N[k]});
+							display_planes({P[i]}, draw_normals);
 
 							ImGui::Begin("button");
 							if (ImGui::Button("step"))
@@ -246,7 +263,12 @@ void mesh::generate_mesh_basic_debug()
 								debug = false;
 								step = true;
 							}
-
+							ImGui::Checkbox("BreakPoint basic tests", &break1);
+							ImGui::Checkbox("BreakPoint intersection test", &break2);
+							ImGui::Checkbox("BreakPoint pre form", &break3);
+							ImGui::Checkbox("BreakPoint post form", &break4);
+							ImGui::Checkbox("display state", &display_state);
+							ImGui::Text(status.c_str());
 							ImGui::End();
 							ImGui::Render();
 							ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -282,7 +304,7 @@ void mesh::generate_mesh_basic_debug()
 					}
 
 					else
-						make_inside_plane(p1.a, p1.b, p1.c, true);
+						make_inside_plane(p1.a, p1.b, p1.c, true, P[i].c);
 
 					p_id = plane_exists(p2);
 					if (p_id != -1)
@@ -292,7 +314,7 @@ void mesh::generate_mesh_basic_debug()
 						disable_common_node(p2, P[i]);
 					}
 					else
-						make_inside_plane(p2.a, p2.b, p2.c, true);
+						make_inside_plane(p2.a, p2.b, p2.c, true, P[i].a);
 
 					p_id = plane_exists(p3);
 					if (p_id != -1)
@@ -303,12 +325,12 @@ void mesh::generate_mesh_basic_debug()
 					}
 
 					else
-						make_inside_plane(p3.a, p3.b, p3.c, true);
+						make_inside_plane(p3.a, p3.b, p3.c, true, P[i].b);
 
 					make_tetrahedron(P[i].a, P[i].b, P[i].c, N[k].id);
 					P[i].availability = false;
 
-					if (debug)
+					if (debug && break4)
 					{
 						step = false;
 						while (!step)
@@ -317,7 +339,7 @@ void mesh::generate_mesh_basic_debug()
 							ImGui_ImplGlfw_NewFrame();
 							ImGui::NewFrame();
 
-							glClear(GL_COLOR_BUFFER_BIT );
+							glClear(GL_COLOR_BUFFER_BIT);
 							p = w.get_pos();
 							rotx = w.get_rotx();
 							roty = w.get_roty();
@@ -341,7 +363,10 @@ void mesh::generate_mesh_basic_debug()
 								debug = false;
 								step = true;
 							}
-
+							ImGui::Checkbox("BreakPoint basic tests", &break1);
+							ImGui::Checkbox("BreakPoint intersection test", &break2);
+							ImGui::Checkbox("BreakPoint pre form", &break3);
+							ImGui::Checkbox("BreakPoint post form", &break4);
 							ImGui::End();
 							ImGui::Render();
 							ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

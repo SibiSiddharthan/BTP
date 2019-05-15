@@ -14,7 +14,7 @@ const double area_of_triangle(const pos a, const pos b, const pos c)
 
 const double volume_of_tetrahedron(const pos a, const pos b, const pos c, const pos d)
 {
-	return fabs(1 / 6 * (dot(cross(a - d, b - d), c - d)));
+	return fabs((dot(cross(a - d, b - d), c - d))) / 6;
 }
 
 pos rotate_point(pos p, double angle)

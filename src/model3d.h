@@ -61,6 +61,8 @@ class model
 	 */
 	std::tuple<std::vector<float>,std::vector<uint32_t>> export_normals() const;
 
+	
+
   public:
 	/**
 	 * @brief Function that displays the 3d object to the screen
@@ -89,6 +91,42 @@ class model
 	{
 		return P.size();
 	}
+
+	/**
+	 * @brief Add a sphere centred at the origin
+	 * 
+	 * @param radius 
+	 * @param dx
+	 */
+	void add_boundary_sphere(double radius,double dx);
+
+	/**
+	 * @brief Add a spherical hole centred at the given point with 
+	 * the given radius
+	 * 
+	 * @param centre 
+	 * @param radius 
+	 * @param dx 
+	 */
+	void add_hole_sphere(pos centre,double radius,double dx);
+
+	/**
+	 * @brief Add a cube centred at the origin
+	 * 
+	 * @param length 
+	 * @param dx 
+	 */
+	void add_boundary_cube(double length, double dx);
+
+	/**
+	 * @brief Add a hole in the shape of a cube at the given centre
+	 * with the given edge length
+	 * 
+	 * @param centre 
+	 * @param length 
+	 * @param dx 
+	 */
+	void add_hole_cube(pos centre, double length, double dx);
 
 	/**
 	 * @brief Transfers the data from the model class to the mesh class

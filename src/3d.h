@@ -225,7 +225,7 @@ struct plane
 	inline plane(uint64_t _a, uint64_t _b, uint64_t _c, uint64_t _id, plane_location _location = plane_location::boundary, bool _availability = true) : a{_a}, b{_b}, c{_c}, id{_id},location{_location},
 																																						availability{_availability} 
 	{
-		normal = cross(a - c, b - c); //!Have to Check
+		//normal = cross(a - c, b - c); //!Have to Check
 	}
 };
 

@@ -341,6 +341,8 @@ class mesh
 	 * @return index of all nodes of the edges as unsigned integer
 	 */
 	std::vector<uint32_t> export_edge_index() const;
+
+	
   public:
 	/**
 	 * @brief imports from 2d model object

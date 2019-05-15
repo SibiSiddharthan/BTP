@@ -230,7 +230,7 @@ void mesh::generate_mesh_basic()
 				}
 
 				else
-					make_inside_plane(p1.a, p1.b, p1.c, true);
+					make_inside_plane(p1.a, p1.b, p1.c, true,P[i].c);
 
 				p_id = plane_exists(p2);
 				if (p_id != -1)
@@ -240,7 +240,7 @@ void mesh::generate_mesh_basic()
 					disable_common_node(p2, P[i]);
 				}
 				else
-					make_inside_plane(p2.a, p2.b, p2.c, true);
+					make_inside_plane(p2.a, p2.b, p2.c, true,P[i].a);
 
 				p_id = plane_exists(p3);
 				if (p_id != -1)
@@ -251,13 +251,13 @@ void mesh::generate_mesh_basic()
 				}
 
 				else
-					make_inside_plane(p3.a, p3.b, p3.c, true);
+					make_inside_plane(p3.a, p3.b, p3.c, true,P[i].b);
 
 				make_tetrahedron(P[i].a, P[i].b, P[i].c, N[k].id);
 				P[i].availability = false;
 			}
 		}
-		cout << number_of_unused_planes(P);
+		cout << number_of_unused_planes(P)<<endl;
 		return;
 	}
 }

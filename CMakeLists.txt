@@ -8,13 +8,14 @@ endif()
 set(mesh_HEADERS 
 	src/2d.h src/3d.h src/dxfreader.h src/position.h src/geometry.h src/gl_abstraction.h
 	src/mesh2d.h src/model2d.h src/mesh3d.h src/model3d.h src/stl_reader.h src/window.h
-	src/linear_algebra.h src/preprocess.h src/mesh.h src/model.h)
+	src/linear_algebra.h src/preprocess.h src/mesh.h src/model.h src/solver.h src/solver2d.h)
 
 set(mesh_SOURCES
 	src/main.cpp src/model2d.cpp src/model3d.cpp src/geometry.cpp src/stl_reader.cpp
 	src/dxfreader.cpp src/linear_algebra.cpp src/window.cpp
 	src/mesh2d_debug.cpp src/mesh2d_display.cpp src/mesh2d_private src/mesh2d_public.cpp
-	src/mesh3d_display.cpp src/mesh3d_private src/mesh3d_public.cpp src/mesh3d_debug.cpp) 
+	src/mesh3d_display.cpp src/mesh3d_private src/mesh3d_public.cpp src/mesh3d_debug.cpp
+	src/solver2d.cpp) 
 
 if(CMAKE_BUILD_TYPE STREQUAL Release)
 	if(NOT MSVC)

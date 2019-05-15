@@ -11,6 +11,12 @@ void mesh::display()
 	plane_tetrahedron_share_sweep();
 	tetrahedron_plane_share_sweep();
 
+	double vol = 0;
+	for(auto th : TH)
+		vol += tetrahedron_volume(th);
+	
+	cout<<vol<<endl;
+
 	window w(800, 800);
 
 	vector<float> posdata = export_vertex_data();
@@ -26,6 +32,7 @@ void mesh::display()
 	bool draw_normals = false;
 	bool draw_normals_specific = false;
 	bool draw_everything = true;
+	bool draw_share_planes = false;
 	ImGuiIO &io = ImGui::GetIO();
 	pos p;
 	float rotx, roty;
@@ -112,20 +119,24 @@ void mesh::display()
 		{
 			if (tharray[i] == char(1))
 			{
-				vector<uint32_t> mTH_index(12), mN_index(4);
+				vector<uint32_t> mTH_index(12), mN_index(4), mP_index(24);
 
+				//face abc
 				mTH_index[0] = uint32_t(TH[i].a);
 				mTH_index[1] = uint32_t(TH[i].b);
 				mTH_index[2] = uint32_t(TH[i].c);
 
+				//face abd
 				mTH_index[3] = uint32_t(TH[i].a);
 				mTH_index[4] = uint32_t(TH[i].b);
 				mTH_index[5] = uint32_t(TH[i].d);
 
+				//face bcd
 				mTH_index[6] = uint32_t(TH[i].d);
 				mTH_index[7] = uint32_t(TH[i].b);
 				mTH_index[8] = uint32_t(TH[i].c);
 
+				//face acd
 				mTH_index[9] = uint32_t(TH[i].a);
 				mTH_index[10] = uint32_t(TH[i].d);
 				mTH_index[11] = uint32_t(TH[i].c);
@@ -135,9 +146,42 @@ void mesh::display()
 				mN_index[2] = uint32_t(TH[i].c);
 				mN_index[3] = uint32_t(TH[i].d);
 
+				//face abc
+				mP_index[0] = uint32_t(TH[i].a);
+				mP_index[1] = uint32_t(TH[i].b);
+				mP_index[2] = uint32_t(TH[i].b);
+				mP_index[3] = uint32_t(TH[i].c);
+				mP_index[4] = uint32_t(TH[i].c);
+				mP_index[5] = uint32_t(TH[i].a);
+
+				//face abd
+				mP_index[6] = uint32_t(TH[i].a);
+				mP_index[7] = uint32_t(TH[i].b);
+				mP_index[8] = uint32_t(TH[i].b);
+				mP_index[9] = uint32_t(TH[i].d);
+				mP_index[10] = uint32_t(TH[i].d);
+				mP_index[11] = uint32_t(TH[i].a);
+
+				//face bcd
+				mP_index[12] = uint32_t(TH[i].b);
+				mP_index[13] = uint32_t(TH[i].c);
+				mP_index[14] = uint32_t(TH[i].c);
+				mP_index[15] = uint32_t(TH[i].d);
+				mP_index[16] = uint32_t(TH[i].d);
+				mP_index[17] = uint32_t(TH[i].b);
+
+				//face acd
+				mP_index[18] = uint32_t(TH[i].a);
+				mP_index[19] = uint32_t(TH[i].c);
+				mP_index[20] = uint32_t(TH[i].c);
+				mP_index[21] = uint32_t(TH[i].d);
+				mP_index[22] = uint32_t(TH[i].d);
+				mP_index[23] = uint32_t(TH[i].a);
+
 				data_buffer m_tetrahedron_index(GL_ELEMENT_ARRAY_BUFFER, mTH_index);
 				data_buffer m_tetrahedron_nodes(GL_ELEMENT_ARRAY_BUFFER, mN_index);
-				vertex_array va_mtetrahedron(GL_TRIANGLES), va_mnodes(GL_POINTS);
+				data_buffer m_tetrahedron_planes(GL_ELEMENT_ARRAY_BUFFER, mP_index);
+				vertex_array va_mtetrahedron(GL_TRIANGLES), va_mnodes(GL_POINTS), va_mplanes(GL_LINES);
 				va_mtetrahedron.bind();
 				va_mtetrahedron.bind_buffer({&vb_pos, &cb_plane, &m_tetrahedron_index});
 				va_mtetrahedron.draw();
@@ -148,13 +192,17 @@ void mesh::display()
 				va_mnodes.draw();
 				va_mnodes.unbind();
 
+				va_mplanes.bind();
+				va_mplanes.bind_buffer({&vb_pos, &cb_plane_edge, &m_tetrahedron_planes});
+				va_mplanes.draw();
+				va_mplanes.unbind();
+
 				if (draw_normals_specific)
 				{
 					vector<float> m_normalpos(24);
 					vector<uint32_t> m_normalpos_index(8);
 					vector<color> m_normal_color(8, colors("blue"));
 					size_t k = 0;
-					cout << TH[i].P.size();
 					for (size_t j = 0; j < 6 * TH[i].P.size(); j += 6)
 					{
 						k = j / 6;
@@ -192,13 +240,42 @@ void mesh::display()
 					va_mnormal.draw();
 					va_mnormal.unbind();
 				}
+
+				if (draw_share_planes)
+				{
+					vector<uint32_t> m_p_index, m_p_nodes;
+					for (const plane_id p_id : TH[i].P)
+					{
+						m_p_index.push_back(uint32_t(P[p_id].a));
+						m_p_index.push_back(uint32_t(P[p_id].b));
+						m_p_index.push_back(uint32_t(P[p_id].c));
+
+						m_p_nodes.push_back(uint32_t(P[p_id].a));
+						m_p_nodes.push_back(uint32_t(P[p_id].b));
+						m_p_nodes.push_back(uint32_t(P[p_id].c));
+					}
+
+					data_buffer m_plane_index(GL_ELEMENT_ARRAY_BUFFER, m_p_index);
+					data_buffer m_plane_nodes(GL_ELEMENT_ARRAY_BUFFER, m_p_nodes);
+					vertex_array va_m_planes(GL_TRIANGLES), va_m_nodes(GL_POINTS);
+					va_m_planes.bind();
+					va_m_planes.bind_buffer({&vb_pos, &cb_plane, &m_plane_index});
+					va_m_planes.draw();
+					va_m_planes.unbind();
+
+					va_m_nodes.bind();
+					va_m_nodes.bind_buffer({&vb_pos, &cb_node, &m_plane_nodes});
+					va_m_nodes.draw();
+					va_m_nodes.unbind();
+				}
 			}
 		}
 
 		ImGui::Begin("model");
 		ImGui::Text("Number of tetrahedrons: %llu", TH.size());
 		ImGui::Checkbox("draw normals", &draw_normals);
-		//ImGui::Checkbox("draw normals specific", &draw_normals_specific);
+		ImGui::Checkbox("draw normals specific", &draw_normals_specific);
+		ImGui::Checkbox("draw share planes", &draw_share_planes);
 		ImGui::Checkbox("draw everything", &draw_everything);
 		for (int i = 0; i < TH.size(); ++i)
 		{
@@ -212,6 +289,8 @@ void mesh::display()
 										   N[TH[i].c].p,
 										   N[TH[i].d].p);
 				ImGui::Text(stats.c_str());
+				string p_share = fmt::format("share {}\n", TH[i].P.size());
+				ImGui::Text(p_share.c_str());
 				if (draw_normals_specific)
 				{
 					ImGui::Text(mn[0].c_str());

@@ -42,13 +42,15 @@ void mesh::plane_tetrahedron_share_sweep()
 	for (plane &m_p : P)
 	{
 		uint64_t count = 0;
-		unordered_set<tetrahedron_id> tetrahedron_track;
+		unordered_set<tetrahedron_id> tetrahedron_track_a,tetrahedron_track_b;
 		for (const tetrahedron_id th_id : N[m_p.a].TH)
-			tetrahedron_track.insert(th_id);
-
+			tetrahedron_track_a.insert(th_id);
 		for (const tetrahedron_id th_id : N[m_p.b].TH)
+			tetrahedron_track_b.insert(th_id);
+
+		for (const tetrahedron_id th_id : N[m_p.c].TH)
 		{
-			if (tetrahedron_track.find(th_id) != tetrahedron_track.end())
+			if (tetrahedron_track_a.find(th_id) != tetrahedron_track_a.end() && tetrahedron_track_b.find(th_id) != tetrahedron_track_b.end())
 			{
 				m_p.TH.push_back(th_id);
 				++count;
@@ -60,6 +62,9 @@ void mesh::plane_tetrahedron_share_sweep()
 				break;
 		}
 	}
+
+	//for (plane &m_p : P)
+		//cout<<m_p.TH.size()<<endl;
 }
 
 void mesh::tetrahedron_plane_share_sweep()
@@ -74,9 +79,14 @@ void mesh::tetrahedron_plane_share_sweep()
 	}
 }
 
-void mesh::make_inside_plane(const node_id a, const node_id b, const node_id c, bool availability)
+void mesh::make_inside_plane(const node_id a, const node_id b, const node_id c, bool availability, const node_id check)
 {
 	P.push_back({a, b, c, P.size(), plane_location::inside, availability});
+	P.back().normal = cross(N[a].p - N[c].p, N[b].p - N[c].p);
+	P.back().normal /= P.back().normal.norm();
+
+	if(left_test(P.back(),N[check]))
+		P.back().normal *= -1.0;
 
 	N[a].IP.push_back(P.size() - 1);
 	N[b].IP.push_back(P.size() - 1);
