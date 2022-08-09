@@ -1,4 +1,4 @@
-# BTP
+# Grid Generator
 This is my first GitHub repository.
 
 Requirements
@@ -9,6 +9,6 @@ Requirements
 
 
 Build Steps
-1) Clone repository : git clone --recurse-submodules https://www.github.com/SibiSiddharthan/BTP.git
-2) Install dependencies : ipython install-dependencies.py [generator] . Note for windows use visual studio or mingw.
+1) Clone repository : git clone --recurse-submodules https://github.com/SibiSiddharthan/Grid-Generator.git
+2) Install dependencies : python3 install-dependencies.py [generator] . Note for windows use visual studio or mingw.
 3) Build : cmake -S . -B ./build -G [generator]

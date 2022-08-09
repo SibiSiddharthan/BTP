@@ -389,9 +389,9 @@ Finds the inclination of ba,bc
 Rotates the points by the minimum angle clockwise and finds the included angle*/
 double angle_between_lines(pos a, pos b, pos c)
 {
-	a = a - b; //shifting origin to b
-	c = c - b;
-	b = b - b;
+	a -=  b; //shifting origin to b
+	c -=  b;
+	b -=  b;
 	double angle_a = line_inclination_absolute({b, a});
 	double angle_c = line_inclination_absolute({b, c});
 

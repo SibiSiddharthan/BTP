@@ -30,8 +30,14 @@ else()
 	set(EXECUTABLE mesh)
 endif()
 
+#add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/preprocess.h.gch
+#				COMMAND ${CMAKE_CXX_COMPILER} -O2 -mavx -c ${CMAKE_CURRENT_SOURCE_DIR}/src/preprocess.h -o ${CMAKE_CURRENT_BINARY_DIR}/preprocess.h.gch)
+
+#add_custom_target(pch DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/preprocess.h.gch)
+
 add_executable(mesh ${mesh_HEADERS} ${mesh_SOURCES})
 set_property(TARGET mesh PROPERTY CXX_STANDARD 17)
+#add_dependencies(mesh pch)
 
 if(WIN32)
 	target_link_libraries(mesh imgui glew32 glfw3 opengl32 fmt)
@@ -40,8 +46,8 @@ else()
 endif()
 
 target_compile_definitions(mesh PRIVATE GLEW_STATIC MESH_DEBUG)
-target_include_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_compile_options(mesh PUBLIC -fdiagnostics-color=always -Wall)
+target_include_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR} )
+target_compile_options(mesh PUBLIC -fdiagnostics-color=always -Wall -mavx) #-include ${CMAKE_CURRENT_SOURCE_DIR}/src/preprocess.h)
 target_link_directories(mesh PRIVATE ${CMAKE_SOURCE_DIR}/lib)
 add_custom_command(TARGET mesh POST_BUILD 
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/${EXECUTABLE} ${CMAKE_SOURCE_DIR})
